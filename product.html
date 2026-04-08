@@ -587,50 +587,26 @@ footer .fc a:hover { color: var(--text); }
   <div class="nav-actions">
     <a href="#"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
     <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
-    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
+    <a href="#" class="cart-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
   </div>
 </nav>
 
 <div class="product-page">
-  <!-- Left: Image Gallery -->
-  <div class="gallery">
-    <div class="g-img">
-      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=1000" alt="NYC Tee">
-    </div>
-    <div class="g-img">
-      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-samantha-ellery.jpg?v=1749765625&width=1000" alt="NYC Tee">
-    </div>
-    <div class="g-img">
-      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-leo-vincent.jpg?v=1749764306&width=1000" alt="NYC Tee">
-    </div>
-    <div class="g-img">
-      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-clyde-felsen.jpg?v=1749764319&width=1000" alt="NYC Tee">
-    </div>
-  </div>
+  <div class="gallery" id="gallery"></div>
 
-  <div class="gallery-dots" id="galleryDots">
-    <span class="active"></span><span></span><span></span><span></span>
-  </div>
+  <div class="gallery-dots" id="galleryDots"></div>
 
-  <!-- Right: Product Info (centered, like existing site but better) -->
   <div class="product-info">
     <div class="pi-brand">Countryside Staples</div>
-    <h1>Everyday NYC Tee</h1>
-    <div class="pi-price">$55.00</div>
+    <h1 id="productTitle"></h1>
+    <div class="pi-price" id="productPrice"></div>
     <div class="pi-shipping">Shipping calculated at checkout</div>
 
     <div class="pi-divider"></div>
 
     <div class="size-row">
       <div class="size-label">Size</div>
-      <div class="size-options">
-        <button onclick="selectSize(this)">XS</button>
-        <button onclick="selectSize(this)">S</button>
-        <button class="selected" onclick="selectSize(this)">M</button>
-        <button onclick="selectSize(this)">L</button>
-        <button onclick="selectSize(this)">XL</button>
-        <button onclick="selectSize(this)">XXL</button>
-      </div>
+      <div class="size-options" id="sizeOptions"></div>
     </div>
 
     <div class="cart-row">
@@ -647,83 +623,13 @@ footer .fc a:hover { color: var(--text); }
 
     <div class="pi-divider"></div>
 
-    <div class="accordion">
-      <details class="acc-item" open>
-        <summary>Description</summary>
-        <div class="acc-content">
-          Our signature heavyweight cotton tee, designed in New York City. Features the Countryside Staples script logo with "New York City" detailing. Cut for an oversized, relaxed fit that drapes perfectly.
-        </div>
-      </details>
-      <details class="acc-item">
-        <summary>Care</summary>
-        <div class="acc-content">
-          Machine wash cold with like colors. Tumble dry low. Do not bleach. Iron on low heat if needed. Do not dry clean.
-        </div>
-      </details>
-      <details class="acc-item">
-        <summary>Design</summary>
-        <div class="acc-content">
-          100% premium heavyweight cotton. 240 GSM. Oversized fit. Ribbed crew neck. Screen-printed script logo. Pre-shrunk. Designed in New York City.
-        </div>
-      </details>
-      <details class="acc-item">
-        <summary>Size Chart</summary>
-        <div class="acc-content">
-          <table class="size-table">
-            <thead><tr><th></th><th>Chest</th><th>Length</th></tr></thead>
-            <tbody>
-              <tr><td>XS</td><td>36"</td><td>26"</td></tr>
-              <tr><td>S</td><td>38"</td><td>27"</td></tr>
-              <tr><td>M</td><td>40"</td><td>28"</td></tr>
-              <tr><td>L</td><td>42"</td><td>29"</td></tr>
-              <tr><td>XL</td><td>44"</td><td>30"</td></tr>
-              <tr><td>XXL</td><td>46"</td><td>31"</td></tr>
-            </tbody>
-          </table>
-          <p style="margin-top:10px;">Model is 5'9" wearing size S.</p>
-        </div>
-      </details>
-    </div>
+    <div class="accordion" id="accordion"></div>
   </div>
 </div>
 
-<!-- Related Products -->
 <section class="related">
   <h2>You may also <em>like</em></h2>
-  <div class="related-grid">
-    <a href="product.html" class="product-card">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-nell-postman.jpg?v=1749766326&width=600" alt="Hoodie">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-julia-plumaker.jpg?v=1766359277&width=600" alt="Hoodie">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta"><h3>Vintage Collegiate Hoodie</h3><div class="detail">Premium Heavyweight</div><div class="price">$120</div></div>
-    </a>
-    <a href="product.html" class="product-card">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-imogen-notaro.jpg?v=1749765054&width=600" alt="Hat">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-theo-haythe.jpg?v=1749765147&width=600" alt="Hat">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta"><h3>Signature Everyday Hat</h3><div class="detail">Navy & Cream</div><div class="price">$70</div></div>
-    </a>
-    <a href="product.html" class="product-card">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Hayla_Pastel_Pink_Longsleeve.jpg?v=1775532815&width=600" alt="Pink LS">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Daria_Pastel_Pink_On_Body.jpg?v=1775532815&width=600" alt="Pink LS">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta"><h3>Pastel Pink Long Sleeve</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
-    </a>
-    <a href="product.html" class="product-card">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-julia-plumaker.jpg?v=1749766825&width=600" alt="F&F Hat">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-jordan-keiser.jpg?v=1749766825&width=600" alt="F&F Hat">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta"><h3>Friends & Family Hat</h3><div class="detail">Cream & Crimson</div><div class="price">$70</div></div>
-    </a>
-  </div>
+  <div class="related-grid" id="relatedGrid"></div>
 </section>
 
 <footer>
@@ -738,21 +644,12 @@ footer .fc a:hover { color: var(--text); }
   <div class="footer-bottom"><span>&copy; 2025 Countryside Staples</span><div class="socials"><a href="#">Instagram</a><a href="#">TikTok</a></div></div>
 </footer>
 
+<script src="cart.js"></script>
 <script>
 const toggle = document.getElementById('menuToggle');
 const dropdown = document.getElementById('menuDropdown');
 toggle.addEventListener('click', () => { toggle.classList.toggle('open'); dropdown.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!toggle.contains(e.target) && !dropdown.contains(e.target)) { toggle.classList.remove('open'); dropdown.classList.remove('open'); } });
-
-// Gallery dot indicators on mobile
-const gallery = document.querySelector('.gallery');
-const dots = document.querySelectorAll('.gallery-dots span');
-if (gallery && dots.length) {
-  gallery.addEventListener('scroll', () => {
-    const idx = Math.round(gallery.scrollLeft / gallery.offsetWidth);
-    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-  }, { passive: true });
-}
 
 function selectSize(btn) {
   document.querySelectorAll('.size-options button').forEach(b => b.classList.remove('selected'));
@@ -766,6 +663,91 @@ function changeQty(delta) {
   if (val > 10) val = 10;
   el.textContent = val;
 }
+
+function cardHTML(p) {
+  const price = '$' + (p.price_cents / 100).toFixed(0);
+  const hover = p.image_hover || p.image_primary;
+  return `<a href="product.html?slug=${encodeURIComponent(p.slug)}" class="product-card">
+    <div class="img-wrap">
+      <img class="img-primary" src="${p.image_primary}" alt="${p.name}">
+      <img class="img-hover" src="${hover}" alt="${p.name}">
+      <div class="quick-add">Quick Add</div>
+    </div>
+    <div class="meta"><h3>${p.name}</h3><div class="detail">${p.detail}</div><div class="price">${price}</div></div>
+  </a>`;
+}
+
+let currentProduct = null;
+
+const slug = new URLSearchParams(window.location.search).get('slug');
+if (!slug) { window.location.href = 'shop.html'; }
+
+// Wire Add to Cart button
+document.querySelector('.add-to-cart').addEventListener('click', () => {
+  if (!currentProduct) return;
+  const selectedSize = document.querySelector('.size-options button.selected');
+  const qty = parseInt(document.getElementById('qty').textContent) || 1;
+  addToCart({
+    slug: currentProduct.slug,
+    name: currentProduct.name,
+    detail: currentProduct.detail,
+    size: selectedSize ? selectedSize.textContent : '',
+    quantity: qty,
+    price_cents: currentProduct.price_cents,
+    image: currentProduct.image_primary,
+  });
+});
+
+// Load product
+fetch(`/api/storefront/products/${encodeURIComponent(slug)}`)
+  .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
+  .then(p => {
+    currentProduct = p;
+    document.title = `${p.name} — Countryside Staples`;
+    document.getElementById('productTitle').textContent = p.name;
+    document.getElementById('productPrice').textContent = '$' + (p.price_cents / 100).toFixed(2);
+
+    // Gallery images
+    const galleryEl = document.getElementById('gallery');
+    const images = [p.image_primary, p.image_hover, ...JSON.parse(p.gallery || '[]')].filter(Boolean);
+    // Deduplicate
+    const unique = [...new Set(images)];
+    galleryEl.innerHTML = unique.map(src => `<div class="g-img"><img src="${src}" alt="${p.name}"></div>`).join('');
+
+    // Gallery dots for mobile
+    const dotsEl = document.getElementById('galleryDots');
+    dotsEl.innerHTML = unique.map((_, i) => `<span${i === 0 ? ' class="active"' : ''}></span>`).join('');
+    galleryEl.addEventListener('scroll', () => {
+      const idx = Math.round(galleryEl.scrollLeft / galleryEl.offsetWidth);
+      dotsEl.querySelectorAll('span').forEach((d, i) => d.classList.toggle('active', i === idx));
+    }, { passive: true });
+
+    // Sizes
+    const sizes = JSON.parse(p.sizes || '[]');
+    const sizeEl = document.getElementById('sizeOptions');
+    sizeEl.innerHTML = sizes.map((s, i) =>
+      `<button${i === Math.floor(sizes.length / 2) ? ' class="selected"' : ''} onclick="selectSize(this)">${s}</button>`
+    ).join('');
+
+    // Accordion
+    const accEl = document.getElementById('accordion');
+    const sections = [];
+    if (p.description) sections.push({ title: 'Description', content: p.description, open: true });
+    if (p.care) sections.push({ title: 'Care', content: p.care });
+    if (p.design) sections.push({ title: 'Design', content: p.design });
+    accEl.innerHTML = sections.map(s =>
+      `<details class="acc-item"${s.open ? ' open' : ''}><summary>${s.title}</summary><div class="acc-content">${s.content}</div></details>`
+    ).join('');
+
+    // Related products
+    return fetch('/api/storefront/products').then(r => r.json()).then(all => {
+      const others = all.filter(x => x.id !== p.id);
+      const shuffled = others.sort(() => Math.random() - 0.5).slice(0, 4);
+      document.getElementById('relatedGrid').innerHTML = shuffled.map(cardHTML).join('');
+    });
+  })
+  .catch(() => { window.location.href = 'shop.html'; });
 </script>
+<script src="cart.js"></script>
 </body>
 </html>

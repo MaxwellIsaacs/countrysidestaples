@@ -10,6 +10,8 @@ const crypto = require('crypto');
 const PORT = process.env.PORT || 3000;
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const STRIPE_PUBLISHABLE = process.env.STRIPE_PUBLISHABLE_KEY || '';
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 
 // ── Database ──
@@ -34,7 +36,7 @@ if (STRIPE_SECRET) {
 const app = express();
 
 // Stripe webhook needs raw body — must come before json parser
-app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!stripe || !STRIPE_WEBHOOK_SECRET) return res.status(400).json({ error: 'Stripe not configured' });
 
   let event;
@@ -61,15 +63,28 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req,
         session.amount_total || 0
       );
 
-      // Insert line items if available
-      if (session.line_items?.data) {
+      // Fetch line items from Stripe (not included in webhook payload)
+      try {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
         const insertItem = db.prepare(`
-          INSERT INTO order_items (order_id, product_name, quantity, price_cents)
-          VALUES (?, ?, ?, ?)
+          INSERT INTO order_items (order_id, product_id, product_name, size, quantity, price_cents)
+          VALUES (?, ?, ?, ?, ?, ?)
         `);
-        for (const item of session.line_items.data) {
-          insertItem.run(result.lastInsertRowid, item.description || '', item.quantity || 1, item.amount_total || 0);
+        for (const item of lineItems.data) {
+          // metadata.product_id and metadata.size are set when creating the checkout session
+          const productId = item.price?.metadata?.product_id || null;
+          const size = item.price?.metadata?.size || '';
+          insertItem.run(
+            result.lastInsertRowid,
+            productId,
+            item.description || '',
+            size,
+            item.quantity || 1,
+            item.amount_total || 0
+          );
         }
+      } catch (err) {
+        console.error('Failed to fetch line items:', err.message);
       }
     }
   }
@@ -229,6 +244,64 @@ app.put('/api/orders/:id/status', requireAuth, (req, res) => {
   db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, req.params.id);
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   res.json(updated);
+});
+
+// ── Stripe checkout (no auth — customers use this) ──
+app.get('/api/stripe/config', (req, res) => {
+  res.json({ publishableKey: STRIPE_PUBLISHABLE, configured: !!STRIPE_SECRET });
+});
+
+app.post('/api/checkout', async (req, res) => {
+  if (!stripe) return res.status(400).json({ error: 'Stripe not configured. Set STRIPE_SECRET_KEY.' });
+
+  const { items } = req.body;
+  // items: [{ slug, size, quantity }]
+  if (!items || !items.length) return res.status(400).json({ error: 'Cart is empty' });
+
+  // Look up products and build line items
+  const getProduct = db.prepare('SELECT * FROM products WHERE slug = ?');
+  const lineItems = [];
+
+  for (const item of items) {
+    const product = getProduct.get(item.slug);
+    if (!product) continue;
+
+    lineItems.push({
+      price_data: {
+        currency: 'usd',
+        unit_amount: product.price_cents,
+        product_data: {
+          name: product.name + (item.size ? ` — ${item.size}` : ''),
+          description: product.detail || undefined,
+          images: product.image_primary ? [product.image_primary] : undefined,
+          metadata: {
+            product_id: String(product.id),
+            size: item.size || '',
+          },
+        },
+      },
+      quantity: item.quantity || 1,
+    });
+  }
+
+  if (!lineItems.length) return res.status(400).json({ error: 'No valid products in cart' });
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: lineItems,
+      shipping_address_collection: {
+        allowed_countries: ['US'],
+      },
+      success_url: `${BASE_URL}/checkout-success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${BASE_URL}/shop.html`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Checkout error:', err.message);
+    res.status(500).json({ error: 'Failed to create checkout session' });
+  }
 });
 
 // ── Public storefront API (no auth) ──

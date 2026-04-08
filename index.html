@@ -1063,67 +1063,11 @@ footer .fc a:hover { color: var(--text); }
   <div class="nav-actions">
     <a href="#" id="searchOpen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
     <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
-    <a href="#" id="cartOpen"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
+    <a href="#" class="cart-link" id="cartOpen"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
   </div>
 </nav>
 
-<!-- CART DRAWER -->
-<div class="cart-backdrop" id="cartBackdrop"></div>
-<div class="cart-drawer" id="cartDrawer">
-  <div class="cart-header">
-    <h2>Cart <span class="cart-count">(2)</span></h2>
-    <button class="cart-close" id="cartClose">&times;</button>
-  </div>
-
-  <div class="cart-items">
-    <div class="cart-item">
-      <div class="cart-item-img">
-        <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-aaron.jpg?v=1749765054&width=200" alt="Navy Hat">
-      </div>
-      <div class="cart-item-details">
-        <h3>Signature Everyday Hat</h3>
-        <div class="cart-item-variant">Navy & Cream</div>
-        <div class="cart-item-qty">
-          <button>−</button>
-          <span>1</span>
-          <button>+</button>
-        </div>
-      </div>
-      <div>
-        <div class="cart-item-price">$70</div>
-        <button class="cart-item-remove">Remove</button>
-      </div>
-    </div>
-
-    <div class="cart-item">
-      <div class="cart-item-img">
-        <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=200" alt="NYC Tee">
-      </div>
-      <div class="cart-item-details">
-        <h3>Everyday NYC Tee</h3>
-        <div class="cart-item-variant">Size M</div>
-        <div class="cart-item-qty">
-          <button>−</button>
-          <span>1</span>
-          <button>+</button>
-        </div>
-      </div>
-      <div>
-        <div class="cart-item-price">$55</div>
-        <button class="cart-item-remove">Remove</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="cart-footer">
-    <div class="cart-subtotal">
-      <span class="subtotal-label">Estimated total</span>
-      <span class="subtotal-price">$125.00</span>
-    </div>
-    <div class="cart-shipping-note">Taxes and shipping calculated at checkout</div>
-    <button class="cart-checkout">Check Out</button>
-  </div>
-</div>
+<!-- Cart drawer injected by cart.js -->
 
 <!-- SEARCH OVERLAY -->
 <div class="search-overlay" id="searchOverlay">
@@ -1199,111 +1143,7 @@ footer .fc a:hover { color: var(--text); }
     <a href="shop.html" class="view-all">Shop All</a>
   </div>
 
-  <div class="product-grid">
-    <a href="product.html" class="product-card reveal rd1">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=800" alt="Everyday NYC Tee" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-samantha-ellery.jpg?v=1749765625&width=800" alt="Everyday NYC Tee" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Everyday NYC Tee</h3>
-        <div class="detail">Heavyweight Cotton</div>
-        <div class="price">$55</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd2">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-red-cream-hat-nell-postman.jpg?v=1749767391&width=800" alt="Red & Cream Hat" loading="lazy">
-        <img class="img-hover" src="red-hat.png" alt="Red & Cream Hat" loading="lazy" style="background:var(--bg);">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Signature Everyday Hat</h3>
-        <div class="detail">Red & Cream</div>
-        <div class="price">$70</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd3">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-julia-plumaker.jpg?v=1749766825&width=800" alt="Friends & Family Hat" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-jordan-keiser.jpg?v=1749766825&width=800" alt="Friends & Family Hat" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Friends & Family Hat</h3>
-        <div class="detail">Cream & Crimson</div>
-        <div class="price">$70</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd4">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-nell-postman.jpg?v=1749766326&width=800" alt="Collegiate Hoodie" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-julia-plumaker.jpg?v=1766359277&width=800" alt="Collegiate Hoodie" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Vintage Collegiate Hoodie</h3>
-        <div class="detail">Premium Heavyweight</div>
-        <div class="price">$120</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd1">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Hayla_Pastel_Pink_Longsleeve.jpg?v=1775532815&width=800" alt="Pastel Pink Long Sleeve" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Daria_Pastel_Pink_On_Body.jpg?v=1775532815&width=800" alt="Pastel Pink Long Sleeve" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Pastel Pink Long Sleeve</h3>
-        <div class="detail">Waffle Knit</div>
-        <div class="price">$85</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd2">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-imogen-notaro.jpg?v=1749765054&width=800" alt="Navy & Cream Hat" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-theo-haythe.jpg?v=1749765147&width=800" alt="Navy & Cream Hat" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Signature Everyday Hat</h3>
-        <div class="detail">Navy & Cream</div>
-        <div class="price">$70</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd3">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Dual_On_Body_Grace_Curley.jpg?v=1775531279&width=800" alt="Baby Blue Set" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Product_Baby_Blue_On_Body.jpg?v=1775533166&width=800" alt="Baby Blue Set" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Baby Blue Long Sleeve</h3>
-        <div class="detail">Waffle Knit</div>
-        <div class="price">$85</div>
-      </div>
-    </a>
-
-    <a href="product.html" class="product-card reveal rd4">
-      <div class="img-wrap">
-        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Pastel_Pink_Dual_On_Body.jpg?v=1775512691&width=800" alt="Lounge Sweats" loading="lazy">
-        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Dual_Walking_Lounge_Sweats.jpg?v=1775533415&width=800" alt="Lounge Sweats" loading="lazy">
-        <div class="quick-add">Quick Add</div>
-      </div>
-      <div class="meta">
-        <h3>Pastel Pink Lounge Sweats</h3>
-        <div class="detail">Waffle Knit</div>
-        <div class="price">$125</div>
-      </div>
-    </a>
-  </div>
+  <div class="product-grid" id="featuredGrid"></div>
 </section>
 
 <!-- EDITORIAL BANNER -->
@@ -1394,6 +1234,7 @@ footer .fc a:hover { color: var(--text); }
   <div class="footer-bottom"><span>&copy; 2025 Countryside Staples</span><div class="socials"><a href="#">Instagram</a><a href="#">TikTok</a></div></div>
 </footer>
 
+<script src="cart.js"></script>
 <script>
 const nav = document.querySelector('nav');
 window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); }, { passive: true });
@@ -1411,26 +1252,6 @@ document.addEventListener('click', (e) => {
     dropdown.classList.remove('open');
   }
 });
-
-// Cart drawer
-const cartOpen = document.getElementById('cartOpen');
-const cartDrawer = document.getElementById('cartDrawer');
-const cartBackdrop = document.getElementById('cartBackdrop');
-const cartClose = document.getElementById('cartClose');
-
-cartOpen.addEventListener('click', (e) => {
-  e.preventDefault();
-  cartDrawer.classList.add('open');
-  cartBackdrop.classList.add('open');
-});
-
-function closeCart() {
-  cartDrawer.classList.remove('open');
-  cartBackdrop.classList.remove('open');
-}
-
-cartClose.addEventListener('click', closeCart);
-cartBackdrop.addEventListener('click', closeCart);
 
 // Search overlay
 const searchOpen = document.getElementById('searchOpen');
@@ -1464,6 +1285,32 @@ function filterProducts(q) {
 const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } }); }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('click', e => { const t = document.querySelector(a.getAttribute('href')); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); } }); });
+
+// Load featured products from API
+fetch('/api/storefront/products')
+  .then(r => r.json())
+  .then(products => {
+    const featured = products.filter(p => p.featured);
+    const items = featured.length >= 4 ? featured : products.slice(0, 8);
+    const delays = ['rd1', 'rd2', 'rd3', 'rd4'];
+    const grid = document.getElementById('featuredGrid');
+    grid.innerHTML = items.map((p, i) => {
+      const price = '$' + (p.price_cents / 100).toFixed(0);
+      const hover = p.image_hover || p.image_primary;
+      const delay = delays[i % 4];
+      return `<a href="product.html?slug=${encodeURIComponent(p.slug)}" class="product-card reveal ${delay}">
+        <div class="img-wrap">
+          <img class="img-primary" src="${p.image_primary}" alt="${p.name}" loading="lazy">
+          <img class="img-hover" src="${hover}" alt="${p.name}" loading="lazy">
+          <div class="quick-add">Quick Add</div>
+        </div>
+        <div class="meta"><h3>${p.name}</h3><div class="detail">${p.detail}</div><div class="price">${price}</div></div>
+      </a>`;
+    }).join('');
+    grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  })
+  .catch(() => {});
 </script>
+<script src="cart.js"></script>
 </body>
 </html>
