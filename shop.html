@@ -78,7 +78,7 @@ nav {
   transform: translateX(-50%);
 }
 
-.nav-logo img { height: 32px; }
+.nav-logo img { height: 40px; }
 
 .nav-actions { display: flex; gap: 20px; align-items: center; }
 .nav-actions a { display: flex; }
@@ -297,7 +297,7 @@ footer .fc a:hover { color: var(--text); }
     <img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples">
   </a>
   <div class="nav-actions">
-    <a href="#"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
+    <a href="#" class="search-link"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
     <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
     <a href="#" class="cart-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
   </div>
@@ -322,8 +322,8 @@ footer .fc a:hover { color: var(--text); }
   <div class="footer-top">
     <div class="footer-brand">Countryside Staples</div>
     <div class="footer-cols">
-      <div class="fc"><h4>Shop</h4><a href="shop.html">All</a><a href="#">Tees</a><a href="#">Hats</a><a href="#">Sweatsuits</a></div>
-      <div class="fc"><h4>Company</h4><a href="index.html#story">Our Story</a><a href="index.html#lookbook">Lookbook</a><a href="#">Stockists</a></div>
+      <div class="fc"><h4>Shop</h4><a href="shop.html">All</a><a href="shop.html">Tees</a><a href="shop.html">Hats</a><a href="shop.html">Sweatsuits</a></div>
+      <div class="fc"><h4>Company</h4><a href="about.html">Our Story</a><a href="index.html#lookbook">Lookbook</a><a href="#">Stockists</a></div>
       <div class="fc"><h4>Help</h4><a href="#">Shipping</a><a href="#">Size Guide</a><a href="#">Contact</a></div>
     </div>
   </div>
@@ -348,7 +348,7 @@ function cardHTML(p) {
     <div class="img-wrap">
       <img class="img-primary" src="${p.image_primary}" alt="${p.name}">
       <img class="img-hover" src="${hover}" alt="${p.name}">
-      <div class="quick-add">Quick Add</div>
+      <div class="quick-add" data-slug="${p.slug}" data-name="${p.name}" data-detail="${p.detail || ''}" data-price="${p.price_cents}" data-image="${p.image_primary}" data-sizes='${p.sizes || "[]"}'>Quick Add</div>
     </div>
     <div class="meta"><h3>${p.name}</h3><div class="detail">${p.detail}</div><div class="price">${price}</div></div>
   </a>`;
@@ -378,6 +378,5 @@ fetch('/api/storefront/products')
   .then(r => r.json())
   .then(products => { allProducts = products; renderProducts(products); });
 </script>
-<script src="cart.js"></script>
 </body>
 </html>

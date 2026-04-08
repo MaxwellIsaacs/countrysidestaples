@@ -26,6 +26,10 @@ db.pragma('foreign_keys = ON');
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Migrations — add columns that may not exist
+try { db.exec('ALTER TABLE products ADD COLUMN archived INTEGER DEFAULT 0'); } catch {}
+try { db.exec("INSERT OR IGNORE INTO site_config (key, value) VALUES ('featured_ids', '[]')"); } catch {}
+
 // ── Stripe (lazy — only if key is set) ──
 let stripe = null;
 if (STRIPE_SECRET) {
@@ -146,9 +150,22 @@ app.get('/api/stats', requireAuth, (req, res) => {
   res.json({ totalProducts, totalOrders, newOrders, revenue });
 });
 
+// ── Site config routes ──
+app.get('/api/config/:key', requireAuth, (req, res) => {
+  const row = db.prepare('SELECT value FROM site_config WHERE key = ?').get(req.params.key);
+  res.json({ key: req.params.key, value: row ? JSON.parse(row.value) : null });
+});
+
+app.put('/api/config/:key', requireAuth, (req, res) => {
+  const { value } = req.body;
+  db.prepare('INSERT OR REPLACE INTO site_config (key, value) VALUES (?, ?)').run(req.params.key, JSON.stringify(value));
+  res.json({ ok: true });
+});
+
 // ── Product routes ──
 app.get('/api/products', requireAuth, (req, res) => {
-  const products = db.prepare('SELECT * FROM products ORDER BY sort_order, created_at DESC').all();
+  const show = req.query.archived === '1' ? 1 : 0;
+  const products = db.prepare('SELECT * FROM products WHERE archived = ? ORDER BY sort_order, created_at DESC').all(show);
   res.json(products);
 });
 
@@ -213,6 +230,14 @@ app.put('/api/products/:id', requireAuth, (req, res) => {
   res.json(updated);
 });
 
+app.put('/api/products/:id/archive', requireAuth, (req, res) => {
+  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Not found' });
+  const newState = existing.archived ? 0 : 1;
+  db.prepare('UPDATE products SET archived = ? WHERE id = ?').run(newState, req.params.id);
+  res.json({ ok: true, archived: newState });
+});
+
 app.delete('/api/products/:id', requireAuth, (req, res) => {
   const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Not found' });
@@ -244,6 +269,57 @@ app.put('/api/orders/:id/status', requireAuth, (req, res) => {
   db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, req.params.id);
   const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(req.params.id);
   res.json(updated);
+});
+
+// ── Customer auth (public) ──
+app.post('/api/account/signup', (req, res) => {
+  const { email, password, first_name, last_name } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+  const existing = db.prepare('SELECT id FROM customers WHERE email = ?').get(email.toLowerCase().trim());
+  if (existing) return res.status(409).json({ error: 'An account with this email already exists' });
+
+  const hash = bcrypt.hashSync(password, 10);
+  const result = db.prepare(
+    'INSERT INTO customers (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)'
+  ).run(email.toLowerCase().trim(), hash, first_name || '', last_name || '');
+
+  req.session.customerId = result.lastInsertRowid;
+  res.json({ ok: true, customer: { id: result.lastInsertRowid, email: email.toLowerCase().trim(), first_name, last_name } });
+});
+
+app.post('/api/account/login', (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
+  const customer = db.prepare('SELECT * FROM customers WHERE email = ?').get(email.toLowerCase().trim());
+  if (!customer || !bcrypt.compareSync(password, customer.password_hash)) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+
+  req.session.customerId = customer.id;
+  res.json({ ok: true, customer: { id: customer.id, email: customer.email, first_name: customer.first_name, last_name: customer.last_name } });
+});
+
+app.post('/api/account/logout', (req, res) => {
+  req.session.customerId = null;
+  res.json({ ok: true });
+});
+
+app.get('/api/account/me', (req, res) => {
+  if (!req.session.customerId) return res.status(401).json({ error: 'Not signed in' });
+  const customer = db.prepare('SELECT id, email, first_name, last_name, created_at FROM customers WHERE id = ?').get(req.session.customerId);
+  if (!customer) { req.session.customerId = null; return res.status(401).json({ error: 'Not signed in' }); }
+  res.json(customer);
+});
+
+app.get('/api/account/orders', (req, res) => {
+  if (!req.session.customerId) return res.status(401).json({ error: 'Not signed in' });
+  const customer = db.prepare('SELECT email FROM customers WHERE id = ?').get(req.session.customerId);
+  if (!customer) return res.status(401).json({ error: 'Not signed in' });
+  const orders = db.prepare('SELECT * FROM orders WHERE customer_email = ? ORDER BY created_at DESC').all(customer.email);
+  res.json(orders);
 });
 
 // ── Stripe checkout (no auth — customers use this) ──
@@ -305,8 +381,13 @@ app.post('/api/checkout', async (req, res) => {
 });
 
 // ── Public storefront API (no auth) ──
+app.get('/api/storefront/lookbook', (req, res) => {
+  const row = db.prepare("SELECT value FROM site_config WHERE key = 'lookbook'").get();
+  res.json(row ? JSON.parse(row.value) : { title: '', label: '', product_ids: [] });
+});
+
 app.get('/api/storefront/products', (req, res) => {
-  const products = db.prepare('SELECT * FROM products WHERE in_stock = 1 ORDER BY sort_order, created_at DESC').all();
+  const products = db.prepare('SELECT * FROM products WHERE in_stock = 1 AND archived = 0 ORDER BY sort_order, created_at DESC').all();
   res.json(products);
 });
 

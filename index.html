@@ -375,6 +375,37 @@ nav.scrolled {
   padding-right: 48px;
 }
 
+.lookbook-arrows {
+  display: flex;
+  gap: 20px;
+}
+
+.lb-arrow {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+
+.lb-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.lb-arrow:hover { color: var(--text); }
+
+.lb-arrow:disabled {
+  opacity: 0.2;
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .lookbook-arrows { display: none; }
+}
+
 .hscroll {
   display: flex;
   gap: 16px;
@@ -1061,68 +1092,13 @@ footer .fc a:hover { color: var(--text); }
     <img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples">
   </a>
   <div class="nav-actions">
-    <a href="#" id="searchOpen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
+    <a href="#" class="search-link"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
     <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
     <a href="#" class="cart-link" id="cartOpen"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
   </div>
 </nav>
 
 <!-- Cart drawer injected by cart.js -->
-
-<!-- SEARCH OVERLAY -->
-<div class="search-overlay" id="searchOverlay">
-  <div class="search-header">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-    <input type="text" id="searchInput" placeholder="Search" autocomplete="off">
-    <button class="search-close" id="searchClose">ESC</button>
-  </div>
-  <div class="search-body">
-    <div class="search-section-label">Products</div>
-    <div class="search-products" id="searchResults">
-      <a href="product.html" class="search-product" data-name="Everyday NYC Tee">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=400" alt="NYC Tee"></div>
-        <h4>Everyday NYC Tee</h4>
-        <div class="sp-price">$55</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Signature Everyday Hat Red Cream">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-red-cream-hat-nell-postman.jpg?v=1749767391&width=400" alt="Red Hat"></div>
-        <h4>Signature Hat — Red & Cream</h4>
-        <div class="sp-price">$70</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Signature Everyday Hat Navy Cream">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-imogen-notaro.jpg?v=1749765054&width=400" alt="Navy Hat"></div>
-        <h4>Signature Hat — Navy & Cream</h4>
-        <div class="sp-price">$70</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Friends Family Hat Cream Crimson">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-julia-plumaker.jpg?v=1749766825&width=400" alt="F&F Hat"></div>
-        <h4>Friends & Family Hat</h4>
-        <div class="sp-price">$70</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Vintage Collegiate Hoodie">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-nell-postman.jpg?v=1749766326&width=400" alt="Hoodie"></div>
-        <h4>Vintage Collegiate Hoodie</h4>
-        <div class="sp-price">$120</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Pastel Pink Long Sleeve Waffle Knit">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/Hayla_Pastel_Pink_Longsleeve.jpg?v=1775532815&width=400" alt="Pink LS"></div>
-        <h4>Pastel Pink Long Sleeve</h4>
-        <div class="sp-price">$85</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Baby Blue Long Sleeve Waffle Knit">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/Dual_On_Body_Grace_Curley.jpg?v=1775531279&width=400" alt="Blue LS"></div>
-        <h4>Baby Blue Long Sleeve</h4>
-        <div class="sp-price">$85</div>
-      </a>
-      <a href="product.html" class="search-product" data-name="Pastel Pink Lounge Sweats Waffle Knit">
-        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/Pastel_Pink_Dual_On_Body.jpg?v=1775512691&width=400" alt="Pink Sweats"></div>
-        <h4>Pastel Pink Lounge Sweats</h4>
-        <div class="sp-price">$125</div>
-      </a>
-    </div>
-    <div class="search-empty" id="searchEmpty" style="display:none;">No results found</div>
-  </div>
-</div>
 
 <!-- HERO -->
 <section class="hero" style="padding:0;">
@@ -1160,40 +1136,15 @@ footer .fc a:hover { color: var(--text); }
 <section class="lookbook-section" id="lookbook">
   <div class="lookbook-header">
     <div>
-      <div class="label reveal">New This Week</div>
-      <h2 class="title reveal rd1" style="margin-top:8px;">Waffle Knit <em>Collection</em></h2>
+      <div class="label reveal" id="lookbookLabel">Lookbook</div>
+      <h2 class="title reveal rd1" style="margin-top:8px;" id="lookbookTitle">Waffle Knit <em>Collection</em></h2>
+    </div>
+    <div class="lookbook-arrows">
+      <button class="lb-arrow" id="lbPrev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M5 12l6-6M5 12l6 6"/></svg></button>
+      <button class="lb-arrow" id="lbNext" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M19 12l-6-6M19 12l-6 6"/></svg></button>
     </div>
   </div>
-  <div class="hscroll">
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/Daria_Pastel_Pink_On_Body.jpg?v=1775532815&width=600" alt="Pastel Pink" loading="lazy"></div>
-      <div class="meta"><h3>Pastel Pink Long Sleeve</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
-    </a>
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/Product_Baby_Blue_On_Body.jpg?v=1775533166&width=600" alt="Baby Blue" loading="lazy"></div>
-      <div class="meta"><h3>Baby Blue Long Sleeve</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
-    </a>
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/lavender-lounges-look-2.jpg?v=1766361070&width=600" alt="Lavender" loading="lazy"></div>
-      <div class="meta"><h3>Lavender Lounge Sweats</h3><div class="detail">Waffle Knit</div><div class="price">$125</div></div>
-    </a>
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/white-navy-raglan-front-look.jpg?v=1766366260&width=600" alt="Raglan" loading="lazy"></div>
-      <div class="meta"><h3>Waffle Knit Raglan</h3><div class="detail">Navy & White</div><div class="price">$85</div></div>
-    </a>
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/waffle-knit-shorts-front.jpg?v=1766363553&width=600" alt="Shorts" loading="lazy"></div>
-      <div class="meta"><h3>Cream Shorts</h3><div class="detail">Waffle Knit</div><div class="price">$78</div></div>
-    </a>
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/Ribbed-knit-tank-horizontal.jpg?v=1766467830&width=600" alt="Tank" loading="lazy"></div>
-      <div class="meta"><h3>Ribbed Knit Tank</h3><div class="detail">Women's</div><div class="price">$35</div></div>
-    </a>
-    <a href="product.html" class="scroll-card">
-      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/oreoraglan-product-front.png?v=1769104857&width=600" alt="Oreo Raglan" loading="lazy"></div>
-      <div class="meta"><h3>Oreo Raglan</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
-    </a>
-  </div>
+  <div class="hscroll" id="lookbookScroll"></div>
 </section>
 
 <!-- STORY -->
@@ -1227,7 +1178,7 @@ footer .fc a:hover { color: var(--text); }
     <div class="footer-brand">Countryside Staples</div>
     <div class="footer-cols">
       <div class="fc"><h4>Shop</h4><a href="shop.html">All</a><a href="shop.html">Tees</a><a href="shop.html">Hats</a><a href="shop.html">Sweatsuits</a></div>
-      <div class="fc"><h4>Company</h4><a href="about.html">Our Story</a><a href="#">Lookbook</a><a href="#">Stockists</a></div>
+      <div class="fc"><h4>Company</h4><a href="about.html">Our Story</a><a href="#lookbook">Lookbook</a><a href="#">Stockists</a></div>
       <div class="fc"><h4>Help</h4><a href="#">Shipping</a><a href="#">Size Guide</a><a href="#">Contact</a></div>
     </div>
   </div>
@@ -1254,42 +1205,17 @@ document.addEventListener('click', (e) => {
 });
 
 // Search overlay
-const searchOpen = document.getElementById('searchOpen');
-const searchOverlay = document.getElementById('searchOverlay');
-const searchClose = document.getElementById('searchClose');
-const searchInput = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
-const searchEmpty = document.getElementById('searchEmpty');
-
-searchOpen.addEventListener('click', (e) => {
-  e.preventDefault();
-  searchOverlay.classList.add('open');
-  setTimeout(() => searchInput.focus(), 100);
-});
-searchClose.addEventListener('click', () => { searchOverlay.classList.remove('open'); searchInput.value = ''; filterProducts(''); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { searchOverlay.classList.remove('open'); searchInput.value = ''; filterProducts(''); } });
-
-searchInput.addEventListener('input', (e) => filterProducts(e.target.value));
-
-function filterProducts(q) {
-  const items = searchResults.querySelectorAll('.search-product');
-  let visible = 0;
-  items.forEach(item => {
-    const match = !q || item.dataset.name.toLowerCase().includes(q.toLowerCase());
-    item.style.display = match ? '' : 'none';
-    if (match) visible++;
-  });
-  searchEmpty.style.display = visible === 0 ? '' : 'none';
-}
+// Search handled by cart.js
 
 const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } }); }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('click', e => { const t = document.querySelector(a.getAttribute('href')); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); } }); });
 
-// Load featured products from API
+// Load featured products + lookbook from API
 fetch('/api/storefront/products')
   .then(r => r.json())
-  .then(products => {
+  .then(async products => {
+    // Featured grid
     const featured = products.filter(p => p.featured);
     const items = featured.length >= 4 ? featured : products.slice(0, 8);
     const delays = ['rd1', 'rd2', 'rd3', 'rd4'];
@@ -1302,15 +1228,51 @@ fetch('/api/storefront/products')
         <div class="img-wrap">
           <img class="img-primary" src="${p.image_primary}" alt="${p.name}" loading="lazy">
           <img class="img-hover" src="${hover}" alt="${p.name}" loading="lazy">
-          <div class="quick-add">Quick Add</div>
+          <div class="quick-add" data-slug="${p.slug}" data-name="${p.name}" data-detail="${p.detail || ''}" data-price="${p.price_cents}" data-image="${p.image_primary}" data-sizes='${p.sizes || "[]"}'>Quick Add</div>
         </div>
         <div class="meta"><h3>${p.name}</h3><div class="detail">${p.detail}</div><div class="price">${price}</div></div>
       </a>`;
     }).join('');
     grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    // Lookbook
+    try {
+      const config = await fetch('/api/storefront/lookbook').then(r => r.json());
+      if (config.title) document.getElementById('lookbookTitle').innerHTML = config.title;
+      if (config.label) document.getElementById('lookbookLabel').textContent = config.label;
+      const lookbookProducts = config.product_ids
+        ? config.product_ids.map(id => products.find(p => p.id === id)).filter(Boolean)
+        : products.slice(0, 7);
+      const scroll = document.getElementById('lookbookScroll');
+      scroll.innerHTML = lookbookProducts.map(p => {
+        const price = '$' + (p.price_cents / 100).toFixed(0);
+        return `<a href="product.html?slug=${encodeURIComponent(p.slug)}" class="scroll-card">
+          <div class="img-wrap"><img src="${p.image_hover || p.image_primary}" alt="${p.name}" loading="lazy"></div>
+          <div class="meta"><h3>${p.name}</h3><div class="detail">${p.detail}</div><div class="price">${price}</div></div>
+        </a>`;
+      }).join('');
+    } catch {
+      // Lookbook config not set — leave empty or fallback
+    }
+    initLookbookArrows();
   })
   .catch(() => {});
+
+function initLookbookArrows() {
+  const hscroll = document.querySelector('.hscroll');
+  const prevBtn = document.getElementById('lbPrev');
+  const nextBtn = document.getElementById('lbNext');
+  if (!hscroll || !prevBtn || !nextBtn) return;
+  const step = () => hscroll.querySelector('.scroll-card')?.offsetWidth + 16 || 276;
+  const updateArrows = () => {
+    prevBtn.disabled = hscroll.scrollLeft <= 0;
+    nextBtn.disabled = hscroll.scrollLeft + hscroll.clientWidth >= hscroll.scrollWidth - 1;
+  };
+  prevBtn.addEventListener('click', () => hscroll.scrollBy({ left: -step(), behavior: 'smooth' }));
+  nextBtn.addEventListener('click', () => hscroll.scrollBy({ left: step(), behavior: 'smooth' }));
+  hscroll.addEventListener('scroll', updateArrows, { passive: true });
+  updateArrows();
+}
 </script>
-<script src="cart.js"></script>
 </body>
 </html>

@@ -684,6 +684,7 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
         <button class="active" data-tab="dashboard">Dashboard</button>
         <button data-tab="products">Products</button>
         <button data-tab="orders">Orders</button>
+        <button data-tab="featured">Featured</button>
       </div>
     </div>
     <div class="nav-right">
@@ -731,7 +732,10 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
     <!-- ── PRODUCTS ── -->
     <div class="tab-content" id="tab-products">
       <div class="section-header">
-        <h1>All <em>Products</em><span class="count" id="productCount"></span></h1>
+        <div style="display:flex;align-items:baseline;gap:16px;">
+          <h1>All <em>Products</em><span class="count" id="productCount"></span></h1>
+          <button class="btn-secondary btn-sm" id="toggleArchived" onclick="toggleArchivedView()" style="font-size:10px;">Show Archived</button>
+        </div>
         <button class="btn-primary" onclick="openProductModal()">+ Add Product</button>
       </div>
       <div class="table-wrap">
@@ -754,6 +758,48 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
         </table>
       </div>
       <div id="orderDetailContainer"></div>
+    </div>
+
+    <!-- ── FEATURED ── -->
+    <div class="tab-content" id="tab-featured">
+      <!-- Featured / New Arrivals -->
+      <div class="section-header">
+        <div>
+          <h1>New <em>Arrivals</em></h1>
+          <p style="font-size:13px;font-weight:300;color:var(--muted);margin-top:4px;">The products shown in the homepage grid. Pick your top picks.</p>
+        </div>
+        <button class="btn-primary" id="saveFeaturedBtn" onclick="saveFeatured()">Save All</button>
+      </div>
+      <div class="table-wrap" style="margin-bottom:56px;">
+        <table>
+          <thead><tr><th style="width:40px;"></th><th>Product</th><th>Category</th><th>Price</th></tr></thead>
+          <tbody id="featuredBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Lookbook / Collection -->
+      <div class="section-header">
+        <div>
+          <h1>Lookbook <em>Collection</em></h1>
+          <p style="font-size:13px;font-weight:300;color:var(--muted);margin-top:4px;">The horizontal scroll section. Set a title and select the products in the collection.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div class="form-row" style="margin:0;">
+          <label style="display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Label</label>
+          <input type="text" id="lookbook-label" placeholder="e.g. New This Week" value="New This Week" style="width:100%;padding:10px 12px;font-size:13px;font-weight:300;border:1px solid rgba(28,26,23,0.15);background:transparent;color:var(--text);outline:none;font-family:'Outfit',sans-serif;">
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label style="display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Title (use &lt;em&gt; for italic)</label>
+          <input type="text" id="lookbook-title" placeholder='e.g. Waffle Knit <em>Collection</em>' style="width:100%;padding:10px 12px;font-size:13px;font-weight:300;border:1px solid rgba(28,26,23,0.15);background:transparent;color:var(--text);outline:none;font-family:'Outfit',sans-serif;">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:40px;"></th><th>Product</th><th>Category</th><th>Price</th></tr></thead>
+          <tbody id="lookbookBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -807,13 +853,25 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
         <label>Design Details</label>
         <textarea id="pf-design" placeholder="100% premium cotton..." style="min-height:50px;"></textarea>
       </div>
-      <div class="form-row">
-        <label>Primary Image URL</label>
-        <input type="url" id="pf-image-primary" placeholder="https://...">
+      <div class="form-row-inline">
+        <div class="form-row">
+          <label>Image 1 (Primary)</label>
+          <input type="url" id="pf-image-primary" placeholder="https://...">
+        </div>
+        <div class="form-row">
+          <label>Image 2 (Hover)</label>
+          <input type="url" id="pf-image-hover" placeholder="https://...">
+        </div>
       </div>
-      <div class="form-row">
-        <label>Hover Image URL</label>
-        <input type="url" id="pf-image-hover" placeholder="https://...">
+      <div class="form-row-inline">
+        <div class="form-row">
+          <label>Image 3</label>
+          <input type="url" id="pf-image-3" placeholder="https://...">
+        </div>
+        <div class="form-row">
+          <label>Image 4</label>
+          <input type="url" id="pf-image-4" placeholder="https://...">
+        </div>
       </div>
       <div class="form-row">
         <label>Sort Order</label>
@@ -844,6 +902,7 @@ let products = [];
 let orders = [];
 let currentTab = 'dashboard';
 let editingProductId = null;
+let showingArchived = false;
 
 // ── API helpers ──
 async function api(path, opts = {}) {
@@ -916,6 +975,7 @@ function switchTab(tab) {
   if (tab === 'dashboard') loadDashboard();
   if (tab === 'products') loadProducts();
   if (tab === 'orders') loadOrders();
+  if (tab === 'featured') loadFeatured();
 }
 
 // ── Greeting ──
@@ -954,13 +1014,29 @@ async function loadDashboard() {
 }
 
 // ── Products ──
+function toggleArchivedView() {
+  showingArchived = !showingArchived;
+  document.getElementById('toggleArchived').textContent = showingArchived ? 'Show Active' : 'Show Archived';
+  loadProducts();
+}
+
+async function archiveProduct(id) {
+  try {
+    await api(`/api/products/${id}/archive`, { method: 'PUT' });
+    loadProducts();
+    if (currentTab === 'dashboard') loadDashboard();
+  } catch (err) { alert('Error: ' + err.message); }
+}
+
 async function loadProducts() {
   try {
-    products = await api('/api/products');
+    products = await api(`/api/products?archived=${showingArchived ? '1' : '0'}`);
+    const label = showingArchived ? 'Archived' : 'All';
     document.getElementById('productCount').textContent = `(${products.length})`;
     const tbody = document.getElementById('productsBody');
+    const emptyMsg = showingArchived ? 'No archived products' : 'No products yet. Add your first one.';
     if (products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No products yet. Add your first one.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">${emptyMsg}</td></tr>`;
     } else {
       tbody.innerHTML = products.map(p => `
         <tr>
@@ -976,7 +1052,12 @@ async function loadProducts() {
           <td style="text-transform:capitalize;">${esc(p.category)}</td>
           <td class="price-cell">${fmtPrice(p.price_cents)}</td>
           <td><span class="badge ${p.in_stock ? 'badge-in-stock' : 'badge-out'}">${p.in_stock ? 'In Stock' : 'Out'}</span></td>
-          <td><button class="btn-secondary btn-sm" onclick="editProduct(${p.id})">Edit</button></td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-secondary btn-sm" onclick="editProduct(${p.id})">Edit</button>
+              <button class="btn-secondary btn-sm" onclick="archiveProduct(${p.id})" style="color:var(--muted);">${p.archived ? 'Restore' : 'Archive'}</button>
+            </div>
+          </td>
         </tr>
       `).join('');
     }
@@ -1003,6 +1084,9 @@ function openProductModal(product = null) {
   document.getElementById('pf-design').value = product ? product.design : '';
   document.getElementById('pf-image-primary').value = product ? product.image_primary : '';
   document.getElementById('pf-image-hover').value = product ? product.image_hover : '';
+  const gallery = product ? JSON.parse(product.gallery || '[]') : [];
+  document.getElementById('pf-image-3').value = gallery[0] || '';
+  document.getElementById('pf-image-4').value = gallery[1] || '';
   document.getElementById('pf-sort').value = product ? product.sort_order : 0;
   document.getElementById('pf-in-stock').checked = product ? !!product.in_stock : true;
   document.getElementById('pf-featured').checked = product ? !!product.featured : false;
@@ -1033,6 +1117,7 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
     design: document.getElementById('pf-design').value,
     image_primary: document.getElementById('pf-image-primary').value,
     image_hover: document.getElementById('pf-image-hover').value,
+    gallery: [document.getElementById('pf-image-3').value, document.getElementById('pf-image-4').value].filter(Boolean),
     sort_order: parseInt(document.getElementById('pf-sort').value) || 0,
     in_stock: document.getElementById('pf-in-stock').checked,
     featured: document.getElementById('pf-featured').checked,
@@ -1154,6 +1239,83 @@ async function updateOrderStatus(id, status) {
     if (currentTab === 'dashboard') loadDashboard();
   } catch (err) {
     alert('Error: ' + err.message);
+  }
+}
+
+// ── Featured + Lookbook ──
+function productCheckRow(p, className, checked) {
+  return `<tr>
+    <td><input type="checkbox" class="${className}" value="${p.id}" ${checked ? 'checked' : ''} style="width:16px;height:16px;accent-color:#1C1A17;cursor:pointer;"></td>
+    <td>
+      <div class="product-name-cell">
+        ${p.image_primary ? `<img class="product-row-img" src="${esc(p.image_primary)}" alt="">` : '<div class="product-row-img"></div>'}
+        <div class="pn-text"><h4>${esc(p.name)}</h4><div class="pn-detail">${esc(p.detail)}</div></div>
+      </div>
+    </td>
+    <td style="text-transform:capitalize;">${esc(p.category)}</td>
+    <td class="price-cell">${fmtPrice(p.price_cents)}</td>
+  </tr>`;
+}
+
+async function loadFeatured() {
+  try {
+    const allProducts = await api('/api/products?archived=0');
+
+    // Featured
+    const featuredBody = document.getElementById('featuredBody');
+    featuredBody.innerHTML = allProducts.map(p => productCheckRow(p, 'featured-check', !!p.featured)).join('');
+
+    // Lookbook
+    const lookbookConfig = await api('/api/config/lookbook');
+    const lb = lookbookConfig.value || { title: '', label: '', product_ids: [] };
+    document.getElementById('lookbook-label').value = lb.label || '';
+    document.getElementById('lookbook-title').value = lb.title || '';
+    const lbIds = lb.product_ids || [];
+
+    const lookbookBody = document.getElementById('lookbookBody');
+    lookbookBody.innerHTML = allProducts.map(p => productCheckRow(p, 'lookbook-check', lbIds.includes(p.id))).join('');
+  } catch (err) {
+    console.error('Failed to load featured:', err);
+  }
+}
+
+async function saveFeatured() {
+  const btn = document.getElementById('saveFeaturedBtn');
+  btn.textContent = 'Saving...';
+
+  try {
+    // Save featured flags
+    const featuredIds = [];
+    document.querySelectorAll('.featured-check').forEach(c => { if (c.checked) featuredIds.push(parseInt(c.value)); });
+
+    const allProducts = await api('/api/products?archived=0');
+    for (const p of allProducts) {
+      const shouldBe = featuredIds.includes(p.id);
+      if (!!p.featured !== shouldBe) {
+        await api(`/api/products/${p.id}`, { method: 'PUT', body: { featured: shouldBe } });
+      }
+    }
+
+    // Save lookbook config
+    const lookbookIds = [];
+    document.querySelectorAll('.lookbook-check').forEach(c => { if (c.checked) lookbookIds.push(parseInt(c.value)); });
+
+    await api('/api/config/lookbook', {
+      method: 'PUT',
+      body: {
+        value: {
+          label: document.getElementById('lookbook-label').value,
+          title: document.getElementById('lookbook-title').value,
+          product_ids: lookbookIds,
+        }
+      }
+    });
+
+    btn.textContent = 'Saved!';
+    setTimeout(() => { btn.textContent = 'Save All'; }, 1500);
+  } catch (err) {
+    alert('Error: ' + err.message);
+    btn.textContent = 'Save All';
   }
 }
 

@@ -84,7 +84,7 @@ nav {
 .nav-dropdown a:hover { background: rgba(28,26,23,0.04); }
 
 .nav-logo { position: absolute; left: 50%; transform: translateX(-50%); }
-.nav-logo img { height: 32px; }
+.nav-logo img { height: 40px; }
 
 .nav-actions { display: flex; gap: 20px; align-items: center; }
 .nav-actions a { display: flex; }
@@ -410,9 +410,9 @@ footer .fc a:hover { color: var(--text); }
     <img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples">
   </a>
   <div class="nav-actions">
-    <a href="#"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
+    <a href="#" class="search-link"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
     <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
-    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
+    <a href="#" class="cart-link"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
   </div>
 </nav>
 
@@ -479,5 +479,6 @@ document.addEventListener('click', (e) => { if (!toggle.contains(e.target) && !d
 const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } }); }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
+<script src="cart.js"></script>
 </body>
 </html>

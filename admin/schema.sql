@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS products (
   gallery TEXT DEFAULT '[]',
   in_stock INTEGER DEFAULT 1,
   featured INTEGER DEFAULT 0,
+  archived INTEGER DEFAULT 0,
   sort_order INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -47,7 +48,22 @@ CREATE TABLE IF NOT EXISTS order_items (
   price_cents INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS site_config (
+  key TEXT PRIMARY KEY,
+  value TEXT DEFAULT '{}'
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  first_name TEXT DEFAULT '',
+  last_name TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
+CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);

@@ -39,11 +39,33 @@ nav {
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   border-bottom: 1px solid var(--border);
 }
 
-nav a img { height: 32px; }
+nav .nav-back {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+  width: 80px;
+}
+
+nav .nav-back:hover { color: var(--text); }
+
+nav .nav-back svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  fill: none;
+}
+
+nav .nav-logo img { height: 32px; }
+nav .nav-spacer { width: 80px; }
 
 /* ── AUTH ── */
 .auth {
@@ -246,19 +268,145 @@ nav a img { height: 32px; }
 .auth-panel { display: none; }
 .auth-panel.active { display: block; }
 
+/* Error message */
+.auth-error {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #8C4A4A;
+  text-align: center;
+  display: none;
+}
+
+/* ── LOGGED IN STATE ── */
+.account-view { display: none; }
+.account-view.visible { display: block; }
+
+.account-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.account-header h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: 32px;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+.account-header h1 em { font-style: italic; }
+
+.account-header .account-email {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--muted);
+}
+
+.account-section {
+  margin-bottom: 32px;
+}
+
+.account-section h3 {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.order-card {
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 18px 20px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-card .oc-left .oc-id {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.order-card .oc-left .oc-date {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.order-card .oc-right {
+  text-align: right;
+}
+
+.order-card .oc-right .oc-total {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+}
+
+.order-card .oc-right .oc-status {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 3px;
+}
+
+.oc-status-new { background: rgba(74,124,89,0.08); color: #4A7C59; }
+.oc-status-processing { background: rgba(184,134,11,0.08); color: #B8860B; }
+.oc-status-shipped { background: rgba(74,106,140,0.08); color: #4A6A8C; }
+.oc-status-delivered { background: rgba(28,26,23,0.05); color: var(--muted); }
+.oc-status-cancelled { background: rgba(140,74,74,0.08); color: #8C4A4A; }
+
+.no-orders {
+  text-align: center;
+  padding: 32px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.btn-signout {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: none;
+  border: 1px solid rgba(28,26,23,0.1);
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-signout:hover { color: var(--text); border-color: var(--text); }
+
 @media (max-width: 640px) {
   nav { padding: 0 20px; }
-  nav a img { height: 24px; }
+  nav .nav-logo img { height: 24px; }
+  nav .nav-back { font-size: 0; width: 32px; }
+  nav .nav-back svg { width: 18px; height: 18px; }
+  nav .nav-spacer { width: 32px; }
 }
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html"><img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples"></a>
+  <a href="javascript:history.back()" class="nav-back"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back</a>
+  <a href="index.html" class="nav-logo"><img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples"></a>
+  <div class="nav-spacer"></div>
 </nav>
 
-<div class="auth">
+<!-- AUTH VIEW -->
+<div class="auth" id="authView">
   <div class="auth-card">
     <h1>Welcome <em>back</em></h1>
     <p class="auth-sub">Sign in to your account or create a new one</p>
@@ -270,74 +418,79 @@ nav a img { height: 32px; }
 
     <!-- SIGN IN -->
     <div class="auth-panel active" id="signinPanel">
-      <div class="social-btns">
-        <button class="social-btn" onclick="alert('Google sign-in coming soon')">
-          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Continue with Google
-        </button>
-        <button class="social-btn" onclick="alert('Apple sign-in coming soon')">
-          <svg viewBox="0 0 24 24" fill="var(--text)"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.13 4.52-3.74 4.25z"/></svg>
-          Continue with Apple
-        </button>
-      </div>
-
-      <div class="auth-divider"><span>or</span></div>
-
-      <form class="auth-form" onsubmit="event.preventDefault();">
+      <form class="auth-form" id="signinForm">
         <div class="auth-field">
           <label>Email</label>
-          <input type="email" placeholder="you@example.com">
+          <input type="email" id="si-email" placeholder="you@example.com" required>
         </div>
         <div class="auth-field">
           <label>Password</label>
-          <input type="password" placeholder="Enter your password">
+          <input type="password" id="si-password" placeholder="Enter your password" required>
         </div>
         <button class="auth-submit" type="submit">Sign In</button>
       </form>
+      <div class="auth-error" id="signinError"></div>
     </div>
 
     <!-- SIGN UP -->
     <div class="auth-panel" id="signupPanel">
-      <div class="social-btns">
-        <button class="social-btn" onclick="alert('Google sign-up coming soon')">
-          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Continue with Google
-        </button>
-        <button class="social-btn" onclick="alert('Apple sign-up coming soon')">
-          <svg viewBox="0 0 24 24" fill="var(--text)"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.13 4.52-3.74 4.25z"/></svg>
-          Continue with Apple
-        </button>
-      </div>
-
-      <div class="auth-divider"><span>or</span></div>
-
-      <form class="auth-form" onsubmit="event.preventDefault();">
+      <form class="auth-form" id="signupForm">
         <div class="auth-field">
           <label>First Name</label>
-          <input type="text" placeholder="First name">
+          <input type="text" id="su-first" placeholder="First name" required>
         </div>
         <div class="auth-field">
           <label>Last Name</label>
-          <input type="text" placeholder="Last name">
+          <input type="text" id="su-last" placeholder="Last name" required>
         </div>
         <div class="auth-field">
           <label>Email</label>
-          <input type="email" placeholder="you@example.com">
+          <input type="email" id="su-email" placeholder="you@example.com" required>
         </div>
         <div class="auth-field">
           <label>Password</label>
-          <input type="password" placeholder="Create a password">
+          <input type="password" id="su-password" placeholder="Create a password (6+ characters)" required minlength="6">
         </div>
         <button class="auth-submit" type="submit">Create Account</button>
       </form>
+      <div class="auth-error" id="signupError"></div>
     </div>
   </div>
 </div>
 
+<!-- LOGGED IN VIEW -->
+<div class="auth" id="accountView" style="display:none;">
+  <div class="auth-card" style="max-width:440px;">
+    <div class="account-header">
+      <h1 id="accountGreeting">Your <em>Account</em></h1>
+      <div class="account-email" id="accountEmail"></div>
+    </div>
+
+    <div class="account-section">
+      <h3>Your Orders</h3>
+      <div id="ordersList"></div>
+    </div>
+
+    <button class="btn-signout" id="signoutBtn">Sign Out</button>
+  </div>
+</div>
+
 <script>
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Something went wrong');
+  return data;
+}
+
 function switchTab(tab) {
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.auth-error').forEach(e => e.style.display = 'none');
   if (tab === 'signin') {
     document.querySelector('.auth-tab:first-child').classList.add('active');
     document.getElementById('signinPanel').classList.add('active');
@@ -346,6 +499,94 @@ function switchTab(tab) {
     document.getElementById('signupPanel').classList.add('active');
   }
 }
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showAuth() {
+  document.getElementById('authView').style.display = 'flex';
+  document.getElementById('accountView').style.display = 'none';
+}
+
+function showAccount(customer) {
+  document.getElementById('authView').style.display = 'none';
+  document.getElementById('accountView').style.display = 'flex';
+  const name = [customer.first_name, customer.last_name].filter(Boolean).join(' ');
+  document.getElementById('accountGreeting').innerHTML = name ? `Hi, <em>${name}</em>` : 'Your <em>Account</em>';
+  document.getElementById('accountEmail').textContent = customer.email;
+  loadOrders();
+}
+
+async function loadOrders() {
+  try {
+    const orders = await api('/api/account/orders');
+    const el = document.getElementById('ordersList');
+    if (!orders.length) {
+      el.innerHTML = '<div class="no-orders">No orders yet</div>';
+      return;
+    }
+    el.innerHTML = orders.map(o => {
+      const date = new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `<div class="order-card">
+        <div class="oc-left">
+          <div class="oc-id">Order #${o.id}</div>
+          <div class="oc-date">${date}</div>
+        </div>
+        <div class="oc-right">
+          <div class="oc-total">$${(o.total_cents / 100).toFixed(2)}</div>
+          <span class="oc-status oc-status-${o.status}">${o.status}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch {
+    document.getElementById('ordersList').innerHTML = '<div class="no-orders">Could not load orders</div>';
+  }
+}
+
+// Sign in
+document.getElementById('signinForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const data = await api('/api/account/login', {
+      method: 'POST',
+      body: { email: document.getElementById('si-email').value, password: document.getElementById('si-password').value },
+    });
+    showAccount(data.customer);
+  } catch (err) {
+    showError('signinError', err.message);
+  }
+});
+
+// Sign up
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const data = await api('/api/account/signup', {
+      method: 'POST',
+      body: {
+        first_name: document.getElementById('su-first').value,
+        last_name: document.getElementById('su-last').value,
+        email: document.getElementById('su-email').value,
+        password: document.getElementById('su-password').value,
+      },
+    });
+    showAccount(data.customer);
+  } catch (err) {
+    showError('signupError', err.message);
+  }
+});
+
+// Sign out
+document.getElementById('signoutBtn').addEventListener('click', async () => {
+  await api('/api/account/logout', { method: 'POST' });
+  showAuth();
+});
+
+// Check if already logged in
+api('/api/account/me').then(showAccount).catch(showAuth);
 </script>
 </body>
 </html>
