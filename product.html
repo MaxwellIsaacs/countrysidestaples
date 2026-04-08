@@ -507,10 +507,57 @@ footer .fc a:hover { color: var(--text); }
 @media (max-width: 640px) {
   nav { padding: 0 20px; height: 56px; }
   .nav-logo img { height: 24px; }
-  .gallery { padding: 4px; gap: 4px; grid-template-columns: 1fr; }
-  .product-info { padding: 32px 20px 48px; }
-  .cart-row { flex-direction: column; }
-  .qty-picker { justify-content: center; }
+
+  /* Gallery becomes horizontal swipeable carousel */
+  .gallery {
+    display: flex;
+    gap: 0;
+    padding: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .gallery::-webkit-scrollbar { display: none; }
+  .gallery .g-img {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+  }
+  .gallery .g-img img { aspect-ratio: 3/4; }
+
+  /* Dot indicators */
+  .gallery-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 0;
+  }
+  .gallery-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(28,26,23,0.15);
+    transition: background 0.3s;
+  }
+  .gallery-dots span.active { background: var(--text); }
+
+  .product-info { padding: 28px 24px 48px; }
+  .product-info .pi-brand { margin-bottom: 12px; }
+  .product-info h1 { font-size: 28px; }
+  .product-info .pi-price { font-size: 14px; margin-top: 12px; }
+  .pi-divider { margin: 20px 0; }
+
+  .size-row { margin-bottom: 18px; }
+  .size-options button { height: 36px; min-width: 40px; padding: 0 12px; font-size: 10px; }
+
+  .cart-row { flex-direction: row; gap: 10px; }
+  .qty-picker button { width: 38px; height: 44px; }
+  .qty-picker .qty-val { height: 44px; line-height: 44px; }
+  .add-to-cart { height: 44px; font-size: 10px; letter-spacing: 2px; }
+
+  .accordion { margin-top: 20px; }
+  .acc-item summary { padding: 14px 0; }
+
   .related { padding: 40px 20px 60px; }
   .related-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .footer-top { flex-direction: column; gap: 24px; }
@@ -518,6 +565,9 @@ footer .fc a:hover { color: var(--text); }
   footer { padding: 32px 20px 16px; }
   .footer-bottom { flex-direction: column; gap: 10px; }
 }
+
+/* Hide dots on desktop */
+.gallery-dots { display: none; }
 </style>
 </head>
 <body>
@@ -556,6 +606,10 @@ footer .fc a:hover { color: var(--text); }
     <div class="g-img">
       <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-clyde-felsen.jpg?v=1749764319&width=1000" alt="NYC Tee">
     </div>
+  </div>
+
+  <div class="gallery-dots" id="galleryDots">
+    <span class="active"></span><span></span><span></span><span></span>
   </div>
 
   <!-- Right: Product Info (centered, like existing site but better) -->
@@ -689,6 +743,16 @@ const toggle = document.getElementById('menuToggle');
 const dropdown = document.getElementById('menuDropdown');
 toggle.addEventListener('click', () => { toggle.classList.toggle('open'); dropdown.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!toggle.contains(e.target) && !dropdown.contains(e.target)) { toggle.classList.remove('open'); dropdown.classList.remove('open'); } });
+
+// Gallery dot indicators on mobile
+const gallery = document.querySelector('.gallery');
+const dots = document.querySelectorAll('.gallery-dots span');
+if (gallery && dots.length) {
+  gallery.addEventListener('scroll', () => {
+    const idx = Math.round(gallery.scrollLeft / gallery.offsetWidth);
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  }, { passive: true });
+}
 
 function selectSize(btn) {
   document.querySelectorAll('.size-options button').forEach(b => b.classList.remove('selected'));
