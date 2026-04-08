@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Countryside Staples — New York City</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F6F3EF;
+  --bg-warm: #EEEAE4;
+  --text: #1C1A17;
+  --muted: #8A8378;
+  --accent: #9C8B72;
+  --border: rgba(28, 26, 23, 0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--text); color: var(--bg); }
+a { color: inherit; text-decoration: none; }
+img { display: block; }
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.5s ease;
+}
+
+nav.scrolled {
+  background: rgba(246,243,239,0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-menu-toggle {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--text);
+  transition: transform 0.3s ease;
+  line-height: 1;
+}
+
+.nav-menu-toggle.open { transform: rotate(45deg); }
+
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% + 20px);
+  left: -8px;
+  width: 180px;
+  background: rgba(246,243,239,0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 0;
+  box-shadow: 0 8px 32px rgba(28,26,23,0.08), 0 1px 3px rgba(28,26,23,0.06);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 0.25s ease;
+}
+
+.nav-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-dropdown a {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-dropdown a:hover { background: rgba(28,26,23,0.04); }
+
+.nav-dropdown .dd-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(28,26,23,0.25);
+  margin-top: 6px;
+  padding: 4px 8px 0;
+}
+
+.nav-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-logo img { height: 32px; }
+
+.nav-actions { display: flex; gap: 20px; align-items: center; }
+.nav-actions a { display: flex; }
+
+.nav-actions svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--text);
+  stroke-width: 1.4;
+  fill: none;
+}
+
+/* ── HERO ── */
+.hero {
+  height: 100vh;
+  min-height: 600px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 72px 48px;
+  background: linear-gradient(to top, rgba(28,26,23,0.55) 0%, transparent 100%);
+}
+
+.hero-overlay h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(44px, 5vw, 72px);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.08;
+}
+
+.hero-overlay h1 em { font-style: italic; }
+
+.hero-cta { margin-top: 24px; }
+
+.hero-cta a {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.25);
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.hero-cta a:hover { color: #fff; border-color: rgba(255,255,255,0.6); }
+
+/* ── SHARED ── */
+.label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.title {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.title em { font-style: italic; }
+
+/* ── FEATURED GRID ── */
+.featured { padding: 100px 48px 80px; }
+
+.featured-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 48px;
+}
+
+.featured-header .view-all {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(28,26,23,0.15);
+  transition: color 0.3s;
+}
+
+.featured-header .view-all:hover { color: var(--text); }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ── PRODUCT CARD ── */
+.product-card { cursor: pointer; }
+
+.product-card .img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-warm);
+  aspect-ratio: 3/4;
+}
+
+.product-card .img-wrap .img-primary,
+.product-card .img-wrap .img-hover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card .img-wrap .img-hover {
+  opacity: 0;
+}
+
+.product-card:hover .img-wrap .img-primary { opacity: 0; }
+.product-card:hover .img-wrap .img-hover { opacity: 1; transform: scale(1.03); }
+
+.product-card .quick-add {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--text);
+  color: var(--bg);
+  text-align: center;
+  padding: 13px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.product-card:hover .quick-add {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-card .meta {
+  padding-top: 14px;
+}
+
+.product-card .meta h3 {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.product-card .meta .detail {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-top: 2px;
+}
+
+.product-card .meta .price {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+/* ── EDITORIAL BANNER ── */
+.editorial-banner {
+  position: relative;
+  height: 65vh;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.editorial-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.75);
+}
+
+.editorial-banner .banner-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px;
+}
+
+.editorial-banner .banner-content .label { color: rgba(255,255,255,0.5); }
+
+.editorial-banner .banner-content h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.15;
+  margin-top: 12px;
+  max-width: 600px;
+}
+
+.editorial-banner .banner-content h2 em { font-style: italic; }
+
+.editorial-banner .banner-cta {
+  margin-top: 28px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.editorial-banner .banner-cta:hover { color: #fff; border-color: rgba(255,255,255,0.6); }
+
+/* ── HORIZONTAL LOOKBOOK ── */
+.lookbook-section {
+  padding: 100px 0 100px 48px;
+  background: var(--bg-warm);
+}
+
+.lookbook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+  padding-right: 48px;
+}
+
+.hscroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-right: 48px;
+}
+
+.hscroll::-webkit-scrollbar { display: none; }
+
+.hscroll .scroll-card {
+  flex: 0 0 260px;
+  min-width: 260px;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.hscroll .scroll-card .img-wrap {
+  overflow: hidden;
+  background: var(--bg);
+  aspect-ratio: 3/4;
+  position: relative;
+}
+
+.hscroll .scroll-card .img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hscroll .scroll-card:hover .img-wrap img { transform: scale(1.04); }
+
+.hscroll .scroll-card .meta { padding: 12px 0 16px; }
+
+.hscroll .scroll-card h3 {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.hscroll .scroll-card .detail {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-top: 2px;
+}
+
+.hscroll .scroll-card .price {
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* ── STORY SPLIT ── */
+.story-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 70vh;
+}
+
+.story-split .st-img { overflow: hidden; }
+
+.story-split .st-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-split .st-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px;
+  background: var(--bg);
+}
+
+.story-split .st-content p {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--muted);
+  max-width: 400px;
+  margin-top: 20px;
+}
+
+.story-split .st-link {
+  margin-top: 32px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 3px;
+  transition: gap 0.3s;
+}
+
+.story-split .st-link:hover { gap: 16px; }
+
+.story-split .st-link svg {
+  width: 14px; height: 14px;
+  stroke: var(--text);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+/* ── NEWSLETTER ── */
+.newsletter {
+  background: var(--bg);
+  text-align: center;
+  padding: 64px 48px;
+}
+
+.nl-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.nl-row .nl-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.nl-row .nl-text em { font-style: italic; }
+
+.nl-row input {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(28,26,23,0.15);
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text);
+  padding: 10px 0;
+  min-width: 0;
+}
+
+.nl-row input::placeholder { color: rgba(28,26,23,0.25); }
+
+.nl-row button {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 11px 24px;
+  border-radius: 20px;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+.nl-row button:hover { opacity: 0.8; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg);
+  color: var(--muted);
+  padding: 40px 48px 24px;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 48px;
+  padding-bottom: 24px;
+}
+
+.footer-cols {
+  display: flex;
+  gap: 56px;
+}
+
+.footer-brand {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  color: var(--text);
+}
+
+footer h4 {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(28,26,23,0.3);
+  margin-bottom: 10px;
+}
+
+footer .fc a {
+  display: block;
+  font-size: 12px;
+  font-weight: 300;
+  margin-bottom: 6px;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+
+footer .fc a:hover { color: var(--text); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: rgba(28,26,23,0.3);
+}
+
+.footer-bottom .socials { display: flex; gap: 20px; }
+
+.footer-bottom .socials a {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.3s;
+}
+
+.footer-bottom .socials a:hover { color: var(--text); }
+
+/* ── SEARCH OVERLAY ── */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(246,243,239,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-overlay.open { opacity: 1; visibility: visible; }
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 48px;
+  height: 64px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.search-header svg {
+  width: 18px; height: 18px;
+  stroke: var(--muted); stroke-width: 1.4; fill: none;
+  flex-shrink: 0;
+}
+
+.search-header input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'EB Garamond', serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.search-header input::placeholder { color: rgba(28,26,23,0.2); }
+
+.search-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--muted);
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.search-close:hover { color: var(--text); }
+
+.search-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 48px;
+}
+
+.search-section-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(28,26,23,0.3);
+  margin-bottom: 16px;
+}
+
+.search-products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.search-product {
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.search-product .sp-img {
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: var(--bg-warm);
+  margin-bottom: 10px;
+}
+
+.search-product .sp-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.search-product:hover .sp-img img { transform: scale(1.03); }
+
+.search-product h4 {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.search-product .sp-price {
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  margin-top: 3px;
+  color: var(--muted);
+}
+
+.search-empty {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 300;
+}
+
+@media (max-width: 640px) {
+  .search-header { padding: 0 20px; }
+  .search-body { padding: 24px 20px; }
+  .search-products { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.v { opacity: 1; transform: translateY(0); }
+.rd1 { transition-delay: 0.06s; }
+.rd2 { transition-delay: 0.12s; }
+.rd3 { transition-delay: 0.18s; }
+.rd4 { transition-delay: 0.24s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .featured { padding: 80px 32px; }
+  nav { padding: 0 32px; }
+  .hero-overlay { padding: 48px 32px; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .story-split { grid-template-columns: 1fr; }
+  .story-split .st-img { min-height: 50vh; }
+  .story-split .st-content { padding: 48px 32px; }
+  .footer-cols { gap: 40px; }
+  .lookbook-section { padding-left: 32px; }
+  .lookbook-header { padding-right: 32px; }
+}
+
+@media (max-width: 640px) {
+  .featured { padding: 56px 20px; }
+  nav { padding: 0 20px; height: 56px; }
+  .nav-links { gap: 16px; }
+  .nav-links a { font-size: 10px; letter-spacing: 1px; }
+  .nav-logo img { height: 24px; }
+  .hero-overlay { padding: 32px 20px; }
+  .product-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .product-card .quick-add { display: none; }
+  .story-split .st-content { padding: 36px 20px; }
+  .lookbook-section { padding: 60px 0 60px 20px; }
+  .lookbook-header { padding-right: 20px; }
+  .hscroll .scroll-card { flex: 0 0 60%; }
+  .newsletter { padding: 48px 20px; }
+  .nl-row { flex-wrap: wrap; gap: 12px; }
+  .nl-row .nl-text { width: 100%; }
+  .nl-row input { flex: 1; }
+  .footer-top { flex-direction: column; gap: 24px; }
+  .footer-cols { flex-wrap: wrap; gap: 32px; }
+  footer { padding: 32px 20px 16px; }
+  .footer-bottom { flex-direction: column; gap: 10px; }
+  .editorial-banner { height: 50vh; min-height: 300px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="position:relative;">
+    <button class="nav-menu-toggle" id="menuToggle" aria-label="Menu">+</button>
+    <div class="nav-dropdown" id="menuDropdown">
+      <a href="shop.html">Shop All</a>
+      <a href="#lookbook">Lookbook</a>
+      <a href="about.html">Our Story</a>
+    </div>
+  </div>
+  <a href="index.html" class="nav-logo">
+    <img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples">
+  </a>
+  <div class="nav-actions">
+    <a href="#" id="searchOpen"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
+    <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
+  </div>
+</nav>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-header">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    <input type="text" id="searchInput" placeholder="Search" autocomplete="off">
+    <button class="search-close" id="searchClose">ESC</button>
+  </div>
+  <div class="search-body">
+    <div class="search-section-label">Products</div>
+    <div class="search-products" id="searchResults">
+      <a href="product.html" class="search-product" data-name="Everyday NYC Tee">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=400" alt="NYC Tee"></div>
+        <h4>Everyday NYC Tee</h4>
+        <div class="sp-price">$55</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Signature Everyday Hat Red Cream">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-red-cream-hat-nell-postman.jpg?v=1749767391&width=400" alt="Red Hat"></div>
+        <h4>Signature Hat — Red & Cream</h4>
+        <div class="sp-price">$70</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Signature Everyday Hat Navy Cream">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-imogen-notaro.jpg?v=1749765054&width=400" alt="Navy Hat"></div>
+        <h4>Signature Hat — Navy & Cream</h4>
+        <div class="sp-price">$70</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Friends Family Hat Cream Crimson">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-julia-plumaker.jpg?v=1749766825&width=400" alt="F&F Hat"></div>
+        <h4>Friends & Family Hat</h4>
+        <div class="sp-price">$70</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Vintage Collegiate Hoodie">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-nell-postman.jpg?v=1749766326&width=400" alt="Hoodie"></div>
+        <h4>Vintage Collegiate Hoodie</h4>
+        <div class="sp-price">$120</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Pastel Pink Long Sleeve Waffle Knit">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/Hayla_Pastel_Pink_Longsleeve.jpg?v=1775532815&width=400" alt="Pink LS"></div>
+        <h4>Pastel Pink Long Sleeve</h4>
+        <div class="sp-price">$85</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Baby Blue Long Sleeve Waffle Knit">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/Dual_On_Body_Grace_Curley.jpg?v=1775531279&width=400" alt="Blue LS"></div>
+        <h4>Baby Blue Long Sleeve</h4>
+        <div class="sp-price">$85</div>
+      </a>
+      <a href="product.html" class="search-product" data-name="Pastel Pink Lounge Sweats Waffle Knit">
+        <div class="sp-img"><img src="https://countrysidestaples.com/cdn/shop/files/Pastel_Pink_Dual_On_Body.jpg?v=1775512691&width=400" alt="Pink Sweats"></div>
+        <h4>Pastel Pink Lounge Sweats</h4>
+        <div class="sp-price">$125</div>
+      </a>
+    </div>
+    <div class="search-empty" id="searchEmpty" style="display:none;">No results found</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" style="padding:0;">
+  <img src="https://countrysidestaples.com/cdn/shop/files/35A_01256.jpg?v=1724042138&width=3840" alt="Countryside Staples" loading="eager">
+  <div class="hero-overlay">
+    <h1>Spring Summer<br><em>Collection</em></h1>
+    <div class="hero-cta"><a href="#shop">Shop the Collection</a></div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section class="featured" id="shop">
+  <div class="featured-header reveal">
+    <div>
+      <div class="label">The Collection</div>
+      <h2 class="title" style="margin-top:8px;">New <em>Arrivals</em></h2>
+    </div>
+    <a href="shop.html" class="view-all">Shop All</a>
+  </div>
+
+  <div class="product-grid">
+    <a href="product.html" class="product-card reveal rd1">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=800" alt="Everyday NYC Tee" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-samantha-ellery.jpg?v=1749765625&width=800" alt="Everyday NYC Tee" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Everyday NYC Tee</h3>
+        <div class="detail">Heavyweight Cotton</div>
+        <div class="price">$55</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd2">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-red-cream-hat-nell-postman.jpg?v=1749767391&width=800" alt="Red & Cream Hat" loading="lazy">
+        <img class="img-hover" src="red-hat.png" alt="Red & Cream Hat" loading="lazy" style="background:var(--bg);">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Signature Everyday Hat</h3>
+        <div class="detail">Red & Cream</div>
+        <div class="price">$70</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd3">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-julia-plumaker.jpg?v=1749766825&width=800" alt="Friends & Family Hat" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-jordan-keiser.jpg?v=1749766825&width=800" alt="Friends & Family Hat" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Friends & Family Hat</h3>
+        <div class="detail">Cream & Crimson</div>
+        <div class="price">$70</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd4">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-nell-postman.jpg?v=1749766326&width=800" alt="Collegiate Hoodie" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-julia-plumaker.jpg?v=1766359277&width=800" alt="Collegiate Hoodie" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Vintage Collegiate Hoodie</h3>
+        <div class="detail">Premium Heavyweight</div>
+        <div class="price">$120</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd1">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Hayla_Pastel_Pink_Longsleeve.jpg?v=1775532815&width=800" alt="Pastel Pink Long Sleeve" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Daria_Pastel_Pink_On_Body.jpg?v=1775532815&width=800" alt="Pastel Pink Long Sleeve" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Pastel Pink Long Sleeve</h3>
+        <div class="detail">Waffle Knit</div>
+        <div class="price">$85</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd2">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-imogen-notaro.jpg?v=1749765054&width=800" alt="Navy & Cream Hat" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-theo-haythe.jpg?v=1749765147&width=800" alt="Navy & Cream Hat" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Signature Everyday Hat</h3>
+        <div class="detail">Navy & Cream</div>
+        <div class="price">$70</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd3">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Dual_On_Body_Grace_Curley.jpg?v=1775531279&width=800" alt="Baby Blue Set" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Product_Baby_Blue_On_Body.jpg?v=1775533166&width=800" alt="Baby Blue Set" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Baby Blue Long Sleeve</h3>
+        <div class="detail">Waffle Knit</div>
+        <div class="price">$85</div>
+      </div>
+    </a>
+
+    <a href="product.html" class="product-card reveal rd4">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Pastel_Pink_Dual_On_Body.jpg?v=1775512691&width=800" alt="Lounge Sweats" loading="lazy">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Dual_Walking_Lounge_Sweats.jpg?v=1775533415&width=800" alt="Lounge Sweats" loading="lazy">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta">
+        <h3>Pastel Pink Lounge Sweats</h3>
+        <div class="detail">Waffle Knit</div>
+        <div class="price">$125</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- EDITORIAL BANNER -->
+<div class="editorial-banner">
+  <img src="https://countrysidestaples.com/cdn/shop/files/Dual_Walking_Lounge_Sweats.jpg?v=1775533415&width=2400" alt="Countryside Staples Editorial" loading="lazy">
+  <div class="banner-content">
+    <div class="label">Countryside Staples</div>
+    <h2>Lorem ipsum dolor sit amet,<br><em>consectetur adipiscing</em></h2>
+    <a href="shop.html" class="banner-cta">Explore the Collection</a>
+  </div>
+</div>
+
+<!-- LOOKBOOK HORIZONTAL SCROLL -->
+<section class="lookbook-section" id="lookbook">
+  <div class="lookbook-header">
+    <div>
+      <div class="label reveal">New This Week</div>
+      <h2 class="title reveal rd1" style="margin-top:8px;">Waffle Knit <em>Collection</em></h2>
+    </div>
+  </div>
+  <div class="hscroll">
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/Daria_Pastel_Pink_On_Body.jpg?v=1775532815&width=600" alt="Pastel Pink" loading="lazy"></div>
+      <div class="meta"><h3>Pastel Pink Long Sleeve</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
+    </a>
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/Product_Baby_Blue_On_Body.jpg?v=1775533166&width=600" alt="Baby Blue" loading="lazy"></div>
+      <div class="meta"><h3>Baby Blue Long Sleeve</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
+    </a>
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/lavender-lounges-look-2.jpg?v=1766361070&width=600" alt="Lavender" loading="lazy"></div>
+      <div class="meta"><h3>Lavender Lounge Sweats</h3><div class="detail">Waffle Knit</div><div class="price">$125</div></div>
+    </a>
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/white-navy-raglan-front-look.jpg?v=1766366260&width=600" alt="Raglan" loading="lazy"></div>
+      <div class="meta"><h3>Waffle Knit Raglan</h3><div class="detail">Navy & White</div><div class="price">$85</div></div>
+    </a>
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/waffle-knit-shorts-front.jpg?v=1766363553&width=600" alt="Shorts" loading="lazy"></div>
+      <div class="meta"><h3>Cream Shorts</h3><div class="detail">Waffle Knit</div><div class="price">$78</div></div>
+    </a>
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/Ribbed-knit-tank-horizontal.jpg?v=1766467830&width=600" alt="Tank" loading="lazy"></div>
+      <div class="meta"><h3>Ribbed Knit Tank</h3><div class="detail">Women's</div><div class="price">$35</div></div>
+    </a>
+    <a href="product.html" class="scroll-card">
+      <div class="img-wrap"><img src="https://countrysidestaples.com/cdn/shop/files/oreoraglan-product-front.png?v=1769104857&width=600" alt="Oreo Raglan" loading="lazy"></div>
+      <div class="meta"><h3>Oreo Raglan</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
+    </a>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="story-split" id="story" style="padding:0;">
+  <div class="st-img">
+    <img src="https://countrysidestaples.com/cdn/shop/files/06107213-C267-4BC0-B104-0B106C38CF72.jpg?v=1754589147&width=1920" alt="Story" loading="lazy">
+  </div>
+  <div class="st-content">
+    <div class="label reveal">Our Story</div>
+    <h2 class="title reveal rd1" style="margin-top:12px;">Lorem ipsum dolor<br>sit <em>amet</em></h2>
+    <p class="reveal rd2">Countryside Staples was built on a simple idea: the best things come from where the pavement ends and the land begins.</p>
+    <p class="reveal rd3">Every piece is designed in New York City and crafted with the kind of care you'd find in a countryside workshop — no shortcuts, no compromises.</p>
+    <a href="about.html" class="st-link reveal rd4">
+      Read More
+      <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <form class="nl-row reveal" onsubmit="event.preventDefault();">
+    <span class="nl-text">Join the <em>family</em></span>
+    <input type="email" placeholder="Email address" required>
+    <button type="submit">Subscribe</button>
+  </form>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">Countryside Staples</div>
+    <div class="footer-cols">
+      <div class="fc"><h4>Shop</h4><a href="shop.html">All</a><a href="shop.html">Tees</a><a href="shop.html">Hats</a><a href="shop.html">Sweatsuits</a></div>
+      <div class="fc"><h4>Company</h4><a href="about.html">Our Story</a><a href="#">Lookbook</a><a href="#">Stockists</a></div>
+      <div class="fc"><h4>Help</h4><a href="#">Shipping</a><a href="#">Size Guide</a><a href="#">Contact</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>&copy; 2025 Countryside Staples</span><div class="socials"><a href="#">Instagram</a><a href="#">TikTok</a></div></div>
+</footer>
+
+<script>
+const nav = document.querySelector('nav');
+window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); }, { passive: true });
+
+// Menu dropdown
+const toggle = document.getElementById('menuToggle');
+const dropdown = document.getElementById('menuDropdown');
+toggle.addEventListener('click', () => {
+  toggle.classList.toggle('open');
+  dropdown.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+    toggle.classList.remove('open');
+    dropdown.classList.remove('open');
+  }
+});
+
+// Search overlay
+const searchOpen = document.getElementById('searchOpen');
+const searchOverlay = document.getElementById('searchOverlay');
+const searchClose = document.getElementById('searchClose');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const searchEmpty = document.getElementById('searchEmpty');
+
+searchOpen.addEventListener('click', (e) => {
+  e.preventDefault();
+  searchOverlay.classList.add('open');
+  setTimeout(() => searchInput.focus(), 100);
+});
+searchClose.addEventListener('click', () => { searchOverlay.classList.remove('open'); searchInput.value = ''; filterProducts(''); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { searchOverlay.classList.remove('open'); searchInput.value = ''; filterProducts(''); } });
+
+searchInput.addEventListener('input', (e) => filterProducts(e.target.value));
+
+function filterProducts(q) {
+  const items = searchResults.querySelectorAll('.search-product');
+  let visible = 0;
+  items.forEach(item => {
+    const match = !q || item.dataset.name.toLowerCase().includes(q.toLowerCase());
+    item.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  searchEmpty.style.display = visible === 0 ? '' : 'none';
+}
+
+const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } }); }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('click', e => { const t = document.querySelector(a.getAttribute('href')); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); } }); });
+</script>
+</body>
+</html>

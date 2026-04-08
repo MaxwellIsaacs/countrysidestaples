@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everyday NYC Tee — Countryside Staples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F6F3EF;
+  --bg-warm: #EEEAE4;
+  --text: #1C1A17;
+  --muted: #8A8378;
+  --accent: #9C8B72;
+  --border: rgba(28, 26, 23, 0.1);
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--text); color: var(--bg); }
+a { color: inherit; text-decoration: none; }
+img { display: block; }
+button { font-family: 'Outfit', sans-serif; }
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(246,243,239,0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-menu-toggle {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; background: none; border: none;
+  font-size: 20px; font-weight: 300; color: var(--text);
+  transition: transform 0.3s ease; line-height: 1;
+}
+.nav-menu-toggle.open { transform: rotate(45deg); }
+
+.nav-dropdown {
+  position: absolute; top: calc(100% + 20px); left: -8px; width: 180px;
+  background: rgba(246,243,239,0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 0;
+  box-shadow: 0 8px 32px rgba(28,26,23,0.08), 0 1px 3px rgba(28,26,23,0.06);
+  padding: 14px 18px; display: flex; flex-direction: column; gap: 2px;
+  opacity: 0; visibility: hidden; transform: translateY(-4px);
+  transition: all 0.25s ease;
+}
+.nav-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
+.nav-dropdown a { font-size: 13px; font-weight: 400; color: var(--text); padding: 6px 8px; border-radius: 4px; transition: background 0.2s, color 0.2s; }
+.nav-dropdown a:hover { background: rgba(28,26,23,0.04); }
+.nav-dropdown .dd-label { font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: rgba(28,26,23,0.25); margin-top: 6px; padding: 4px 8px 0; }
+
+.nav-logo { position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-logo img { height: 32px; }
+
+.nav-actions { display: flex; gap: 20px; align-items: center; }
+.nav-actions a { display: flex; }
+
+.nav-actions svg {
+  width: 18px; height: 18px;
+  stroke: var(--text); stroke-width: 1.4; fill: none;
+}
+
+/* ── PRODUCT LAYOUT ── */
+.product-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 64px);
+}
+
+/* Left: scrolling image gallery */
+.gallery {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-content: start;
+}
+
+.gallery .g-img {
+  overflow: hidden;
+  background: var(--bg-warm);
+  cursor: crosshair;
+}
+
+.gallery .g-img img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.gallery .g-img:hover img {
+  transform: scale(1.03);
+}
+
+/* Right: sticky product info */
+.product-info {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 64px;
+  text-align: center;
+}
+
+.product-info .pi-brand {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.product-info h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+  max-width: 420px;
+}
+
+.product-info .pi-price {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text);
+  margin-top: 16px;
+}
+
+.product-info .pi-shipping {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Divider */
+.pi-divider {
+  width: 100%;
+  max-width: 420px;
+  height: 1px;
+  background: var(--border);
+  margin: 28px 0;
+}
+
+/* Size selector */
+.size-row {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.size-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.size-options {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.size-options button {
+  height: 38px;
+  min-width: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(28,26,23,0.12);
+  border-radius: 20px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.size-options button:hover {
+  border-color: var(--text);
+}
+
+.size-options button.selected {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* Quantity + Add to Cart row */
+.cart-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.qty-picker {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(28,26,23,0.12);
+  flex-shrink: 0;
+}
+
+.qty-picker button {
+  width: 44px;
+  height: 50px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text);
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-picker button:hover { background: rgba(28,26,23,0.03); }
+
+.qty-picker .qty-val {
+  width: 36px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+  border-left: 1px solid rgba(28,26,23,0.08);
+  border-right: 1px solid rgba(28,26,23,0.08);
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-to-cart {
+  flex: 1;
+  height: 50px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.3s;
+}
+
+.add-to-cart:hover { opacity: 0.85; }
+
+.add-to-cart svg {
+  width: 16px; height: 16px;
+  stroke: var(--bg); stroke-width: 1.4; fill: none;
+}
+
+/* Accordion */
+.accordion {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 28px;
+  text-align: left;
+}
+
+.acc-item {
+  border-top: 1px solid var(--border);
+}
+
+.acc-item:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.acc-item summary {
+  padding: 16px 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color 0.3s;
+}
+
+.acc-item summary::-webkit-details-marker { display: none; }
+
+.acc-item summary::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%231C1A17' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease;
+}
+
+.acc-item[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.acc-item .acc-content {
+  padding: 0 0 16px;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.size-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.size-table th {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(28,26,23,0.35);
+  text-align: left;
+  padding: 0 0 8px;
+}
+
+.size-table td {
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.size-table td:first-child {
+  font-weight: 500;
+  color: var(--text);
+  width: 48px;
+}
+
+/* ── RELATED ── */
+.related {
+  padding: 80px 48px 100px;
+  border-top: 1px solid var(--border);
+}
+
+.related h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 36px;
+}
+
+.related h2 em { font-style: italic; }
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.product-card { cursor: pointer; }
+
+.product-card .img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-warm);
+  aspect-ratio: 3/4;
+}
+
+.product-card .img-wrap .img-primary,
+.product-card .img-wrap .img-hover {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card .img-wrap .img-hover { opacity: 0; }
+.product-card:hover .img-wrap .img-primary { opacity: 0; }
+.product-card:hover .img-wrap .img-hover { opacity: 1; transform: scale(1.03); }
+
+.product-card .quick-add {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--text); color: var(--bg);
+  text-align: center; padding: 13px;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 2px; text-transform: uppercase;
+  opacity: 0; transform: translateY(100%);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.product-card:hover .quick-add { opacity: 1; transform: translateY(0); }
+
+.product-card .meta { padding-top: 12px; }
+.product-card .meta h3 { font-size: 13px; font-weight: 400; }
+.product-card .meta .detail { font-size: 11px; color: var(--muted); font-weight: 300; margin-top: 2px; }
+.product-card .meta .price { font-family: 'EB Garamond', serif; font-size: 15px; margin-top: 5px; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg);
+  color: var(--muted);
+  padding: 40px 48px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 48px;
+  padding-bottom: 24px;
+}
+
+.footer-cols { display: flex; gap: 56px; }
+
+.footer-brand {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  color: var(--text);
+}
+
+footer h4 {
+  font-size: 9px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(28,26,23,0.3); margin-bottom: 10px;
+}
+
+footer .fc a {
+  display: block; font-size: 12px; font-weight: 300;
+  margin-bottom: 6px; color: var(--muted); transition: color 0.3s;
+}
+
+footer .fc a:hover { color: var(--text); }
+
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 10px; color: rgba(28,26,23,0.3);
+}
+
+.footer-bottom .socials { display: flex; gap: 20px; }
+
+.footer-bottom .socials a {
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); transition: color 0.3s;
+}
+
+.footer-bottom .socials a:hover { color: var(--text); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  nav { padding: 0 32px; }
+  .product-page { grid-template-columns: 1fr; }
+  .gallery { padding: 8px 32px; }
+  .product-info {
+    position: static;
+    height: auto;
+    padding: 48px 32px 64px;
+  }
+  .related { padding: 60px 32px 80px; }
+  .related-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-cols { gap: 40px; }
+}
+
+@media (max-width: 640px) {
+  nav { padding: 0 20px; height: 56px; }
+  .nav-logo img { height: 24px; }
+  .gallery { padding: 4px; gap: 4px; grid-template-columns: 1fr; }
+  .product-info { padding: 32px 20px 48px; }
+  .cart-row { flex-direction: column; }
+  .qty-picker { justify-content: center; }
+  .related { padding: 40px 20px 60px; }
+  .related-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .footer-top { flex-direction: column; gap: 24px; }
+  .footer-cols { flex-wrap: wrap; gap: 32px; }
+  footer { padding: 32px 20px 16px; }
+  .footer-bottom { flex-direction: column; gap: 10px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="position:relative;">
+    <button class="nav-menu-toggle" id="menuToggle" aria-label="Menu">+</button>
+    <div class="nav-dropdown" id="menuDropdown">
+      <a href="shop.html">Shop All</a>
+      <a href="index.html#lookbook">Lookbook</a>
+      <a href="about.html">Our Story</a>
+    </div>
+  </div>
+  <a href="index.html" class="nav-logo">
+    <img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples">
+  </a>
+  <div class="nav-actions">
+    <a href="#"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></a>
+    <a href="account.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg></a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
+  </div>
+</nav>
+
+<div class="product-page">
+  <!-- Left: Image Gallery -->
+  <div class="gallery">
+    <div class="g-img">
+      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-imogen.jpg?v=1749765625&width=1000" alt="NYC Tee">
+    </div>
+    <div class="g-img">
+      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-samantha-ellery.jpg?v=1749765625&width=1000" alt="NYC Tee">
+    </div>
+    <div class="g-img">
+      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-leo-vincent.jpg?v=1749764306&width=1000" alt="NYC Tee">
+    </div>
+    <div class="g-img">
+      <img src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-everyday-nyc-tee-clyde-felsen.jpg?v=1749764319&width=1000" alt="NYC Tee">
+    </div>
+  </div>
+
+  <!-- Right: Product Info (centered, like existing site but better) -->
+  <div class="product-info">
+    <div class="pi-brand">Countryside Staples</div>
+    <h1>Everyday NYC Tee</h1>
+    <div class="pi-price">$55.00</div>
+    <div class="pi-shipping">Shipping calculated at checkout</div>
+
+    <div class="pi-divider"></div>
+
+    <div class="size-row">
+      <div class="size-label">Size</div>
+      <div class="size-options">
+        <button onclick="selectSize(this)">XS</button>
+        <button onclick="selectSize(this)">S</button>
+        <button class="selected" onclick="selectSize(this)">M</button>
+        <button onclick="selectSize(this)">L</button>
+        <button onclick="selectSize(this)">XL</button>
+        <button onclick="selectSize(this)">XXL</button>
+      </div>
+    </div>
+
+    <div class="cart-row">
+      <div class="qty-picker">
+        <button onclick="changeQty(-1)">−</button>
+        <div class="qty-val" id="qty">1</div>
+        <button onclick="changeQty(1)">+</button>
+      </div>
+      <button class="add-to-cart">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="pi-divider"></div>
+
+    <div class="accordion">
+      <details class="acc-item" open>
+        <summary>Description</summary>
+        <div class="acc-content">
+          Our signature heavyweight cotton tee, designed in New York City. Features the Countryside Staples script logo with "New York City" detailing. Cut for an oversized, relaxed fit that drapes perfectly.
+        </div>
+      </details>
+      <details class="acc-item">
+        <summary>Care</summary>
+        <div class="acc-content">
+          Machine wash cold with like colors. Tumble dry low. Do not bleach. Iron on low heat if needed. Do not dry clean.
+        </div>
+      </details>
+      <details class="acc-item">
+        <summary>Design</summary>
+        <div class="acc-content">
+          100% premium heavyweight cotton. 240 GSM. Oversized fit. Ribbed crew neck. Screen-printed script logo. Pre-shrunk. Designed in New York City.
+        </div>
+      </details>
+      <details class="acc-item">
+        <summary>Size Chart</summary>
+        <div class="acc-content">
+          <table class="size-table">
+            <thead><tr><th></th><th>Chest</th><th>Length</th></tr></thead>
+            <tbody>
+              <tr><td>XS</td><td>36"</td><td>26"</td></tr>
+              <tr><td>S</td><td>38"</td><td>27"</td></tr>
+              <tr><td>M</td><td>40"</td><td>28"</td></tr>
+              <tr><td>L</td><td>42"</td><td>29"</td></tr>
+              <tr><td>XL</td><td>44"</td><td>30"</td></tr>
+              <tr><td>XXL</td><td>46"</td><td>31"</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:10px;">Model is 5'9" wearing size S.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- Related Products -->
+<section class="related">
+  <h2>You may also <em>like</em></h2>
+  <div class="related-grid">
+    <a href="product.html" class="product-card">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-nell-postman.jpg?v=1749766326&width=600" alt="Hoodie">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-vintage-collegiate-hoodie-julia-plumaker.jpg?v=1766359277&width=600" alt="Hoodie">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta"><h3>Vintage Collegiate Hoodie</h3><div class="detail">Premium Heavyweight</div><div class="price">$120</div></div>
+    </a>
+    <a href="product.html" class="product-card">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-imogen-notaro.jpg?v=1749765054&width=600" alt="Hat">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-signature-navy-cream-hat-theo-haythe.jpg?v=1749765147&width=600" alt="Hat">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta"><h3>Signature Everyday Hat</h3><div class="detail">Navy & Cream</div><div class="price">$70</div></div>
+    </a>
+    <a href="product.html" class="product-card">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/Hayla_Pastel_Pink_Longsleeve.jpg?v=1775532815&width=600" alt="Pink LS">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/Daria_Pastel_Pink_On_Body.jpg?v=1775532815&width=600" alt="Pink LS">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta"><h3>Pastel Pink Long Sleeve</h3><div class="detail">Waffle Knit</div><div class="price">$85</div></div>
+    </a>
+    <a href="product.html" class="product-card">
+      <div class="img-wrap">
+        <img class="img-primary" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-julia-plumaker.jpg?v=1749766825&width=600" alt="F&F Hat">
+        <img class="img-hover" src="https://countrysidestaples.com/cdn/shop/files/countryside-staples-friends-family-hat-jordan-keiser.jpg?v=1749766825&width=600" alt="F&F Hat">
+        <div class="quick-add">Quick Add</div>
+      </div>
+      <div class="meta"><h3>Friends & Family Hat</h3><div class="detail">Cream & Crimson</div><div class="price">$70</div></div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">Countryside Staples</div>
+    <div class="footer-cols">
+      <div class="fc"><h4>Shop</h4><a href="shop.html">All</a><a href="#">Tees</a><a href="#">Hats</a><a href="#">Sweatsuits</a></div>
+      <div class="fc"><h4>Company</h4><a href="index.html#story">Our Story</a><a href="index.html#lookbook">Lookbook</a><a href="#">Stockists</a></div>
+      <div class="fc"><h4>Help</h4><a href="#">Shipping</a><a href="#">Size Guide</a><a href="#">Contact</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>&copy; 2025 Countryside Staples</span><div class="socials"><a href="#">Instagram</a><a href="#">TikTok</a></div></div>
+</footer>
+
+<script>
+const toggle = document.getElementById('menuToggle');
+const dropdown = document.getElementById('menuDropdown');
+toggle.addEventListener('click', () => { toggle.classList.toggle('open'); dropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!toggle.contains(e.target) && !dropdown.contains(e.target)) { toggle.classList.remove('open'); dropdown.classList.remove('open'); } });
+
+function selectSize(btn) {
+  document.querySelectorAll('.size-options button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function changeQty(delta) {
+  const el = document.getElementById('qty');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 1) val = 1;
+  if (val > 10) val = 10;
+  el.textContent = val;
+}
+</script>
+</body>
+</html>
