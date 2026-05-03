@@ -66,7 +66,7 @@ function createCartDrawer() {
 
   const drawer = document.createElement('div');
   drawer.id = 'cartDrawer';
-  drawer.style.cssText = 'display:none;position:fixed;top:0;right:0;width:400px;max-width:90vw;height:100vh;background:#F6F3EF;z-index:201;box-shadow:-4px 0 24px rgba(0,0,0,0.08);flex-direction:column;overflow:hidden;';
+  drawer.style.cssText = 'display:none;position:fixed;top:0;right:0;width:400px;max-width:calc(100vw - 72px);height:100vh;background:#F6F3EF;z-index:201;box-shadow:-4px 0 24px rgba(0,0,0,0.08);flex-direction:column;overflow:hidden;';
 
   drawer.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:24px 28px;border-bottom:1px solid rgba(28,26,23,0.08);">
@@ -222,7 +222,7 @@ function createSearchOverlay() {
       .search-result-name{font-size:22px;font-weight:600;color:#1C1A17;text-decoration:none;width:max-content;max-width:100%;transition:opacity .2s}
       .search-result-name:hover{opacity:0.55}
       .search-empty{padding:24px 0;color:#8A8378;font-size:14px;font-weight:300}
-      @media(max-width:640px){.search-close{right:20px}.search-input-wrap{padding:96px 20px 0}.search-input-row input{font-size:32px}.search-body{padding:32px 20px}.search-result-name{font-size:18px}}
+      @media(max-width:640px){.search-close{right:20px}.search-input-wrap{padding:96px 20px 0}.search-input-row input{font-size:32px}.search-body{padding:32px 20px}.search-result-name{font-size:18px}.search-submit{display:none}}
     `;
     document.head.appendChild(style);
   }

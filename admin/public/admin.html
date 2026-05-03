@@ -651,14 +651,27 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
 }
 
 @media (max-width: 640px) {
-  .admin-nav { padding: 0 16px; flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 8px; }
+  .admin-nav { padding: 12px 16px; flex-wrap: wrap; height: auto; gap: 8px; row-gap: 6px; }
   .admin-nav .nav-right { display: none; }
-  .main { padding: 24px 16px 48px; }
-  .stat-grid { grid-template-columns: 1fr; }
-  .modal { padding: 24px; }
-  .form-row-inline { grid-template-columns: 1fr; }
+  .admin-tabs { gap: 14px; flex-wrap: wrap; }
+  .admin-tabs button { font-size: 10px; letter-spacing: 1.5px; padding: 6px 0; }
+  .main { padding: 24px 16px 80px; }
+  .stat-grid { grid-template-columns: 1fr; gap: 12px; }
+  .stat-card { padding: 16px; }
+  .modal { padding: 20px 18px; max-width: 100%; max-height: 100vh; border-radius: 0; }
+  .modal-overlay { padding: 0; }
+  .form-row-inline { grid-template-columns: 1fr; gap: 12px; }
   .order-detail-grid { grid-template-columns: 1fr; }
   .section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .section-header h1 { font-size: 24px; }
+  .table-wrap { font-size: 12px; -webkit-overflow-scrolling: touch; }
+  thead th, tbody td { padding: 12px 14px; }
+  .product-row-img { width: 40px; height: 50px; }
+  .pn-text h4 { font-size: 12px; }
+  .pn-detail { font-size: 10px; }
+  .save-all-floating { top: auto; bottom: 16px; right: 16px; left: 16px; width: auto; padding: 14px 20px; font-size: 12px; box-shadow: 0 8px 24px rgba(28,26,23,0.25); }
+  /* New Arrivals / Lookbook label+title fields stack on mobile */
+  .tab-content > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
 }
 </style>
 </head>
