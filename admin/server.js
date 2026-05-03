@@ -205,8 +205,8 @@ app.post('/api/products', requireAuth, (req, res) => {
     JSON.stringify(sizes || ['XS','S','M','L','XL','XXL']),
     category || 'tops', image_primary || '', image_hover || '',
     JSON.stringify(gallery || []),
-    size_chart_enabled ? 1 : 0,
-    size_chart_type || '',
+    size_chart_enabled === undefined ? 1 : (size_chart_enabled ? 1 : 0),
+    size_chart_type || 'shirt',
     in_stock !== undefined ? (in_stock ? 1 : 0) : 1,
     featured ? 1 : 0,
     sort_order || 0
