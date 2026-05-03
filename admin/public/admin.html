@@ -643,6 +643,149 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
 
 .recent-header a:hover { color: var(--text); }
 
+/* ── SIZE CHART GRID ── */
+#sizeChartsEditor > div[data-sc-type] {
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 18px 20px 18px;
+}
+#sizeChartsEditor > div[data-sc-type] > div:first-child {
+  font-family: 'EB Garamond', serif;
+  font-size: 17px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--text);
+  margin-bottom: 14px;
+  text-transform: capitalize !important;
+}
+.sc-table-wrap { overflow-x: auto; }
+.sc-table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.sc-th, .sc-td {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  vertical-align: middle;
+}
+.sc-th { border-bottom-color: rgba(28,26,23,0.18); }
+.sc-th-action, .sc-td-action {
+  width: 32px;
+  text-align: center;
+  border-bottom: none;
+}
+.sc-input {
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 13px;
+  font-weight: 300;
+  font-family: 'Outfit', sans-serif;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.sc-input:hover { background: rgba(28,26,23,0.025); }
+.sc-input:focus { border-color: var(--text); background: #fff; }
+.sc-input-header {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sc-input-header:focus { color: var(--text); }
+.sc-x {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(28,26,23,0.25);
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+.sc-x:hover { color: #c44; }
+.sc-x-col {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.sc-th:hover .sc-x-col { opacity: 1; }
+.sc-td-action .sc-x { opacity: 0; }
+tr:hover .sc-td-action .sc-x { opacity: 1; }
+.sc-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.sc-btn {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sc-btn:hover { color: var(--text); border-color: var(--text); }
+
+/* ── SETTINGS COLLAPSIBLE ── */
+.settings-section {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  margin-bottom: 14px;
+}
+.settings-section > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.settings-section > summary::-webkit-details-marker { display: none; }
+.settings-section > summary h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  margin: 0;
+}
+.settings-section > summary h2 em { font-style: italic; }
+.settings-section > summary p {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.settings-chev {
+  font-size: 14px;
+  color: var(--muted);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.settings-section[open] .settings-chev { transform: rotate(180deg); }
+.settings-body {
+  padding: 4px 22px 22px;
+  border-top: 1px solid var(--border);
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
   .admin-nav { padding: 0 24px; }
@@ -848,11 +991,18 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
       </div>
 
       <!-- Size Charts -->
-      <div style="margin-bottom:48px;">
-        <h2 style="font-family:'EB Garamond',serif;font-size:22px;font-weight:400;margin-bottom:6px;">Size <em>Charts</em></h2>
-        <p style="font-size:13px;font-weight:300;color:var(--muted);margin-bottom:18px;">Edit the chart for each garment type. Pipe-delimited rows; first row is the header. Toggle per product in the product editor.</p>
-        <div id="sizeChartsEditor" style="display:flex;flex-direction:column;gap:20px;"></div>
-      </div>
+      <details class="settings-section" open>
+        <summary>
+          <div>
+            <h2>Size <em>Charts</em></h2>
+            <p>Edit the chart for each garment type. Toggle per product in the product editor.</p>
+          </div>
+          <span class="settings-chev">▾</span>
+        </summary>
+        <div class="settings-body">
+          <div id="sizeChartsEditor" style="display:flex;flex-direction:column;gap:20px;"></div>
+        </div>
+      </details>
     </div>
   </div>
 </div>
@@ -1416,17 +1566,116 @@ const SIZE_CHART_TYPES = [
   { key: 'hat',    label: 'Hat' },
 ];
 
+// Holds the in-memory grid for each chart type: { shirt: { headers: [...], rows: [[...]] }, ... }
+let sizeChartGrids = {};
+
+function parseChart(text) {
+  const rows = String(text || '').split(/\r?\n/).map(r => r.trim()).filter(Boolean).map(r => r.split('|').map(c => c.trim()));
+  if (!rows.length) return { headers: ['Size', 'Chest', 'Length'], rows: [['', '', '']] };
+  const [headers, ...body] = rows;
+  return { headers, rows: body.length ? body.map(r => normalizeRow(r, headers.length)) : [headers.map(() => '')] };
+}
+
+function normalizeRow(row, len) {
+  const out = row.slice(0, len);
+  while (out.length < len) out.push('');
+  return out;
+}
+
+function serializeChart(grid) {
+  if (!grid.headers.length) return '';
+  const lines = [grid.headers.join(' | ')];
+  grid.rows.forEach(r => lines.push(normalizeRow(r, grid.headers.length).join(' | ')));
+  return lines.join('\n');
+}
+
+function renderSizeChartGrid(typeKey) {
+  const grid = sizeChartGrids[typeKey];
+
+  const headerRow = `<tr>
+    ${grid.headers.map((h, ci) => `
+      <th class="sc-th">
+        <input value="${esc(h)}" data-r="-1" data-c="${ci}" placeholder="Column" class="sc-input sc-input-header">
+        ${grid.headers.length > 1 ? `<button type="button" class="sc-del-col sc-x sc-x-col" data-c="${ci}" title="Delete column" aria-label="Delete column">×</button>` : ''}
+      </th>
+    `).join('')}
+    <th class="sc-th-action"></th>
+  </tr>`;
+
+  const bodyRows = grid.rows.map((row, ri) => `<tr>
+    ${row.map((c, ci) => `<td class="sc-td"><input value="${esc(c)}" data-r="${ri}" data-c="${ci}" placeholder="—" class="sc-input"></td>`).join('')}
+    <td class="sc-td-action">${grid.rows.length > 1 ? `<button type="button" class="sc-del-row sc-x" data-r="${ri}" title="Delete row" aria-label="Delete row">×</button>` : ''}</td>
+  </tr>`).join('');
+
+  return `
+    <div class="sc-table-wrap">
+      <table class="sc-table">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>
+    <div class="sc-actions">
+      <button type="button" class="sc-btn sc-add-row">+ Add Row</button>
+      <button type="button" class="sc-btn sc-add-col">+ Add Column</button>
+    </div>
+  `;
+}
+
+function renderAllSizeCharts() {
+  const editor = document.getElementById('sizeChartsEditor');
+  editor.innerHTML = SIZE_CHART_TYPES.map(t => `
+    <div data-sc-type="${t.key}">
+      <div>${t.label}</div>
+      <div class="sc-grid-wrap">${renderSizeChartGrid(t.key)}</div>
+    </div>
+  `).join('');
+  attachSizeChartHandlers();
+}
+
+function attachSizeChartHandlers() {
+  document.querySelectorAll('#sizeChartsEditor [data-sc-type]').forEach(box => {
+    const typeKey = box.dataset.scType;
+    const grid = sizeChartGrids[typeKey];
+    const wrap = box.querySelector('.sc-grid-wrap');
+
+    wrap.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', (e) => {
+        const r = parseInt(e.target.dataset.r, 10);
+        const c = parseInt(e.target.dataset.c, 10);
+        if (r === -1) grid.headers[c] = e.target.value;
+        else grid.rows[r][c] = e.target.value;
+      });
+    });
+    wrap.querySelectorAll('.sc-del-col').forEach(btn => btn.addEventListener('click', () => {
+      const c = parseInt(btn.dataset.c, 10);
+      grid.headers.splice(c, 1);
+      grid.rows.forEach(r => r.splice(c, 1));
+      wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+    }));
+    wrap.querySelectorAll('.sc-del-row').forEach(btn => btn.addEventListener('click', () => {
+      const r = parseInt(btn.dataset.r, 10);
+      grid.rows.splice(r, 1);
+      wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+    }));
+    wrap.querySelector('.sc-add-row').addEventListener('click', () => {
+      grid.rows.push(grid.headers.map(() => ''));
+      wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+    });
+    wrap.querySelector('.sc-add-col').addEventListener('click', () => {
+      grid.headers.push('');
+      grid.rows.forEach(r => r.push(''));
+      wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+    });
+  });
+}
+
 async function loadSettings() {
   try {
     const cfg = await api('/api/config/size_charts');
     const charts = cfg.value || {};
-    const editor = document.getElementById('sizeChartsEditor');
-    editor.innerHTML = SIZE_CHART_TYPES.map(t => `
-      <div>
-        <label style="display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">${t.label}</label>
-        <textarea data-sc-type="${t.key}" style="width:100%;min-height:130px;padding:10px 12px;font-family:'JetBrains Mono', ui-monospace, monospace;font-size:12px;line-height:1.5;border:1px solid rgba(28,26,23,0.15);background:transparent;color:var(--text);outline:none;">${esc(charts[t.key] || '')}</textarea>
-      </div>
-    `).join('');
+    sizeChartGrids = {};
+    SIZE_CHART_TYPES.forEach(t => { sizeChartGrids[t.key] = parseChart(charts[t.key] || ''); });
+    renderAllSizeCharts();
   } catch (err) {
     console.error('Failed to load settings:', err);
   }
@@ -1437,9 +1686,7 @@ async function saveSettings() {
   btn.textContent = 'Saving...';
   try {
     const charts = {};
-    document.querySelectorAll('#sizeChartsEditor textarea').forEach(t => {
-      charts[t.dataset.scType] = t.value;
-    });
+    SIZE_CHART_TYPES.forEach(t => { charts[t.key] = serializeChart(sizeChartGrids[t.key]); });
     await api('/api/config/size_charts', { method: 'PUT', body: { value: charts } });
     btn.textContent = 'Saved!';
     setTimeout(() => { btn.textContent = 'Save Settings'; }, 1500);
