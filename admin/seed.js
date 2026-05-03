@@ -28,6 +28,10 @@ async function seedAdmin() {
   let password = process.argv[3] || process.env.ADMIN_PASSWORD;
 
   if (!email || !password) {
+    if (!process.stdin.isTTY) {
+      console.log('No admin credentials provided (set ADMIN_EMAIL and ADMIN_PASSWORD env vars), skipping admin seed...');
+      return;
+    }
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const ask = (q) => new Promise(r => rl.question(q, r));
     if (!email) email = await ask('Admin email: ');
