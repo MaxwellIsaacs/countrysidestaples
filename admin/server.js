@@ -97,6 +97,7 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
 });
 
 app.use(express.json());
+app.get(['/admin', '/admin/'], (req, res) => res.redirect('/admin.html'));
 app.use(express.static(path.join(__dirname, 'public')));
 // Serve main site files from parent directory
 app.use(express.static(path.join(__dirname, '..')));
@@ -383,6 +384,11 @@ app.post('/api/checkout', async (req, res) => {
 // ── Public storefront API (no auth) ──
 app.get('/api/storefront/lookbook', (req, res) => {
   const row = db.prepare("SELECT value FROM site_config WHERE key = 'lookbook'").get();
+  res.json(row ? JSON.parse(row.value) : { title: '', label: '', product_ids: [] });
+});
+
+app.get('/api/storefront/new-arrivals', (req, res) => {
+  const row = db.prepare("SELECT value FROM site_config WHERE key = 'new_arrivals'").get();
   res.json(row ? JSON.parse(row.value) : { title: '', label: '', product_ids: [] });
 });
 

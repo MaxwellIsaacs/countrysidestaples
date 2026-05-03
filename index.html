@@ -55,69 +55,106 @@ nav.scrolled {
 }
 
 .nav-menu-toggle {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed;
+  top: 16px;
+  left: 48px;
+  width: 32px;
+  height: 32px;
+  display: block;
   cursor: pointer;
   background: none;
   border: none;
-  font-size: 20px;
-  font-weight: 300;
+  padding: 0;
   color: var(--text);
-  transition: transform 0.3s ease;
-  line-height: 1;
+  z-index: 500;
+}
+.nav-menu-toggle-spacer { width: 32px; height: 32px; }
+@media (max-width: 768px) {
+  .nav-menu-toggle { left: 20px; }
 }
 
-.nav-menu-toggle.open { transform: rotate(45deg); }
+.nav-menu-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text);
+  stroke-width: 1.4;
+  fill: none;
+  display: block;
+  margin: 6px;
+}
+.nav-menu-toggle svg line {
+  transform-origin: 12px 12px;
+  transition: transform 0.4s cubic-bezier(.2,.7,.2,1);
+}
+.nav-menu-toggle.open svg line.h,
+.nav-menu-toggle.open svg line.v { transform: rotate(45deg); }
 
-.nav-dropdown {
-  position: absolute;
-  top: calc(100% + 20px);
-  left: -8px;
-  width: 180px;
-  background: rgba(246,243,239,0.95);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 0;
-  box-shadow: 0 8px 32px rgba(28,26,23,0.08), 0 1px 3px rgba(28,26,23,0.06);
-  padding: 14px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 240;
+  padding: 120px 48px 48px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-4px);
-  transition: all 0.25s ease;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+  overflow-y: auto;
 }
 
-.nav-dropdown.open {
+.nav-overlay.open {
   opacity: 1;
   visibility: visible;
+}
+
+.nav-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 1400px;
+}
+
+.nav-overlay a {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(28px, 3.6vw, 44px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--text);
+  padding: 4px 0;
+  transition: opacity 0.2s, transform 0.45s cubic-bezier(.2,.7,.2,1), letter-spacing 0.3s;
+  opacity: 0;
+  transform: translateY(12px);
+  letter-spacing: -0.01em;
+  width: max-content;
+  max-width: 100%;
+}
+
+.nav-overlay a em {
+  font-style: italic;
+  color: rgba(28,26,23,0.55);
+  font-weight: 400;
+}
+
+.nav-overlay a:hover { letter-spacing: 0.005em; opacity: 0.6; }
+
+.nav-overlay.open a {
+  opacity: 1;
   transform: translateY(0);
 }
 
-.nav-dropdown a {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text);
-  padding: 6px 8px;
-  border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
-}
+.nav-overlay.open a:nth-child(1)  { transition-delay: 0.05s; }
+.nav-overlay.open a:nth-child(2)  { transition-delay: 0.09s; }
+.nav-overlay.open a:nth-child(3)  { transition-delay: 0.13s; }
+.nav-overlay.open a:nth-child(4)  { transition-delay: 0.17s; }
+.nav-overlay.open a:nth-child(5)  { transition-delay: 0.21s; }
+.nav-overlay.open a:nth-child(6)  { transition-delay: 0.25s; }
+.nav-overlay.open a:nth-child(7)  { transition-delay: 0.29s; }
+.nav-overlay.open a:nth-child(8)  { transition-delay: 0.33s; }
+.nav-overlay.open a:nth-child(9)  { transition-delay: 0.37s; }
+.nav-overlay.open a:nth-child(10) { transition-delay: 0.41s; }
 
-.nav-dropdown a:hover { background: rgba(28,26,23,0.04); }
-
-.nav-dropdown .dd-label {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(28,26,23,0.25);
-  margin-top: 6px;
-  padding: 4px 8px 0;
-}
+nav.menu-open .nav-logo,
+nav.menu-open .nav-actions { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+body.menu-open { overflow: hidden; }
 
 .nav-logo {
   position: absolute;
@@ -1079,15 +1116,9 @@ footer .fc a:hover { color: var(--text); }
      use this as the single source of truth for the shared
      <Nav /> component. Everything else is a replica.
      ============================================================ -->
+<button class="nav-menu-toggle" id="menuToggle" aria-label="Menu"><svg viewBox="0 0 24 24"><line class="h" x1="3" y1="12" x2="21" y2="12"/><line class="v" x1="12" y1="3" x2="12" y2="21"/></svg></button>
 <nav>
-  <div style="position:relative;">
-    <button class="nav-menu-toggle" id="menuToggle" aria-label="Menu">+</button>
-    <div class="nav-dropdown" id="menuDropdown">
-      <a href="shop.html">Shop All</a>
-      <a href="#lookbook">Lookbook</a>
-      <a href="about.html">Our Story</a>
-    </div>
-  </div>
+  <div class="nav-menu-toggle-spacer"></div>
   <a href="index.html" class="nav-logo">
     <img src="https://countrysidestaples.com/cdn/shop/files/6_by_150_logo.png?v=1748844280&width=500" alt="Countryside Staples">
   </a>
@@ -1097,6 +1128,20 @@ footer .fc a:hover { color: var(--text); }
     <a href="#" class="cart-link" id="cartOpen"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>
   </div>
 </nav>
+
+<div class="nav-overlay" id="menuDropdown">
+  <div class="nav-overlay-inner">
+    <a href="shop.html">All</a>
+    <a href="shop.html?category=hats">Hats</a>
+    <a href="shop.html?category=tops">Tops</a>
+    <a href="shop.html?category=hoodies">Hoodies</a>
+    <a href="shop.html?category=bottoms">Bottoms</a>
+    <a href="shop.html?filter=bestsellers">Best Sellers</a>
+    <a href="index.html#lookbook">This Season</a>
+    <a href="about.html">Our Story</a>
+    <a href="account.html">Account</a>
+  </div>
+</div>
 
 <!-- Cart drawer injected by cart.js -->
 
@@ -1113,8 +1158,8 @@ footer .fc a:hover { color: var(--text); }
 <section class="featured" id="shop">
   <div class="featured-header reveal">
     <div>
-      <div class="label">The Collection</div>
-      <h2 class="title" style="margin-top:8px;">New <em>Arrivals</em></h2>
+      <div class="label" id="newArrivalsLabel">The Collection</div>
+      <h2 class="title" style="margin-top:8px;" id="newArrivalsTitle">New <em>Arrivals</em></h2>
     </div>
     <a href="shop.html" class="view-all">Shop All</a>
   </div>
@@ -1193,16 +1238,15 @@ window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', windo
 // Menu dropdown
 const toggle = document.getElementById('menuToggle');
 const dropdown = document.getElementById('menuDropdown');
-toggle.addEventListener('click', () => {
-  toggle.classList.toggle('open');
-  dropdown.classList.toggle('open');
-});
-document.addEventListener('click', (e) => {
-  if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
-    toggle.classList.remove('open');
-    dropdown.classList.remove('open');
-  }
-});
+function setMenu(open) {
+  toggle.classList.toggle('open', open);
+  dropdown.classList.toggle('open', open);
+  nav.classList.toggle('menu-open', open);
+  document.body.classList.toggle('menu-open', open);
+}
+toggle.addEventListener('click', () => setMenu(!dropdown.classList.contains('open')));
+dropdown.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
 
 // Search overlay
 // Search handled by cart.js
@@ -1215,9 +1259,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('cli
 fetch('/api/storefront/products')
   .then(r => r.json())
   .then(async products => {
-    // Featured grid
+    // New Arrivals (configurable label/title/products)
+    try {
+      const naConfig = await fetch('/api/storefront/new-arrivals').then(r => r.json());
+      if (naConfig.label) document.getElementById('newArrivalsLabel').textContent = naConfig.label;
+      if (naConfig.title) document.getElementById('newArrivalsTitle').innerHTML = naConfig.title;
+      var naProducts = (naConfig.product_ids || []).map(id => products.find(p => p.id === id)).filter(Boolean);
+    } catch (e) { var naProducts = []; }
+
     const featured = products.filter(p => p.featured);
-    const items = featured.length >= 4 ? featured : products.slice(0, 8);
+    const items = naProducts.length >= 4
+      ? naProducts
+      : (featured.length >= 4 ? featured : products.slice(0, 8));
     const delays = ['rd1', 'rd2', 'rd3', 'rd4'];
     const grid = document.getElementById('featuredGrid');
     grid.innerHTML = items.map((p, i) => {

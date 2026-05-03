@@ -200,25 +200,29 @@ function createSearchOverlay() {
     const style = document.createElement('style');
     style.id = 'searchStyles';
     style.textContent = `
-      .search-overlay{position:fixed;inset:0;z-index:200;background:rgba(246,243,239,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;display:flex;flex-direction:column}
-      .search-overlay.open{opacity:1;visibility:visible}
-      .search-header{display:flex;align-items:center;gap:16px;padding:0 48px;height:64px;border-bottom:1px solid rgba(28,26,23,0.08);flex-shrink:0}
-      .search-header svg{width:18px;height:18px;stroke:#8A8378;stroke-width:1.4;fill:none;flex-shrink:0}
-      .search-header input{flex:1;background:none;border:none;outline:none;font-family:'EB Garamond',serif;font-size:24px;font-weight:400;color:#1C1A17;letter-spacing:-.3px}
-      .search-header input::placeholder{color:rgba(28,26,23,0.2)}
-      .search-close{background:none;border:none;cursor:pointer;font-size:14px;font-weight:300;color:#8A8378;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:color .2s}
-      .search-close:hover{color:#1C1A17}
-      .search-body{flex:1;overflow-y:auto;padding:32px 48px}
-      .search-section-label{font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(28,26,23,0.3);margin-bottom:16px}
-      .search-products{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-      .search-product{cursor:pointer;text-decoration:none;color:#1C1A17}
-      .search-product .sp-img{aspect-ratio:3/4;overflow:hidden;background:#EEEAE4;margin-bottom:10px}
-      .search-product .sp-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
-      .search-product:hover .sp-img img{transform:scale(1.03)}
-      .search-product h4{font-size:12px;font-weight:400}
-      .search-product .sp-price{font-family:'EB Garamond',serif;font-size:14px;margin-top:3px;color:#8A8378}
-      .search-empty{text-align:center;padding:80px 0;color:#8A8378;font-size:14px;font-weight:300}
-      @media(max-width:640px){.search-header{padding:0 20px}.search-body{padding:24px 20px}.search-products{grid-template-columns:1fr 1fr}}
+      .search-overlay{position:fixed;top:0;left:0;right:0;bottom:auto;z-index:300;background:#FFFFFF;border-bottom:1px solid rgba(28,26,23,0.12);box-shadow:0 16px 40px rgba(28,26,23,0.12);transform:translateY(-12px);opacity:0;visibility:hidden;transition:opacity .25s ease,transform .35s cubic-bezier(.2,.7,.2,1),visibility .25s ease;height:fit-content;min-height:0;display:block}
+      .search-overlay > *{display:block}
+      body.search-open .nav-menu-toggle{display:none}
+      .search-overlay.open{opacity:1;visibility:visible;transform:translateY(0)}
+      .search-close{position:absolute;top:16px;right:48px;background:none;border:none;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#1C1A17;z-index:301;padding:0}
+      .search-close svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.4;fill:none;display:block}
+      .search-input-wrap{padding:64px 48px 0;position:relative}
+      .search-input-row{display:flex;align-items:center;gap:24px;border-bottom:1px solid #1C1A17;padding-bottom:14px}
+      .search-input-row input{flex:1;background:none;border:none;outline:none;font-family:'EB Garamond',serif;font-size:clamp(36px,5vw,64px);font-weight:400;color:#1C1A17;letter-spacing:-.01em;padding:0;line-height:1.1}
+      .search-input-row input::placeholder{color:rgba(28,26,23,0.18);font-weight:400}
+      .search-submit{background:none;border:none;cursor:pointer;color:#1C1A17;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:transform .25s ease}
+      .search-submit:hover{transform:translateX(4px)}
+      .search-submit svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.4;fill:none;display:block}
+      .search-clear{background:none;border:none;cursor:pointer;color:#1C1A17;width:36px;height:36px;display:none;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+      .search-clear.show{display:flex}
+      .search-clear svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.4;fill:none;display:block}
+      .search-body{padding:32px 48px 40px}
+      .search-section-label{font-size:13px;font-weight:600;color:#1C1A17;margin-bottom:18px;letter-spacing:0}
+      .search-results-list{display:flex;flex-direction:column;gap:14px}
+      .search-result-name{font-size:22px;font-weight:600;color:#1C1A17;text-decoration:none;width:max-content;max-width:100%;transition:opacity .2s}
+      .search-result-name:hover{opacity:0.55}
+      .search-empty{padding:24px 0;color:#8A8378;font-size:14px;font-weight:300}
+      @media(max-width:640px){.search-close{right:20px}.search-input-wrap{padding:96px 20px 0}.search-input-row input{font-size:32px}.search-body{padding:32px 20px}.search-result-name{font-size:18px}}
     `;
     document.head.appendChild(style);
   }
@@ -227,66 +231,92 @@ function createSearchOverlay() {
   el.id = 'searchOverlay';
   el.className = 'search-overlay';
   el.innerHTML = `
-    <div class="search-header">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-      <input type="text" id="searchInput" placeholder="Search" autocomplete="off">
-      <button class="search-close" id="searchClose">ESC</button>
+    <button class="search-close" id="searchClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+    </button>
+    <div class="search-input-wrap">
+      <div class="search-input-row">
+        <input type="text" id="searchInput" placeholder="Tee, hat, hoodie..." autocomplete="off">
+        <button class="search-clear" id="searchClear" aria-label="Clear">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        </button>
+        <button class="search-submit" aria-label="Search">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>
+        </button>
+      </div>
     </div>
     <div class="search-body">
-      <div class="search-section-label">Products</div>
-      <div class="search-products" id="searchResults"></div>
+      <div class="search-section-label" id="searchLabel">Suggested</div>
+      <div class="search-results-list" id="searchResults"></div>
       <div class="search-empty" id="searchEmpty" style="display:none;">No results found</div>
     </div>`;
   document.body.appendChild(el);
 
   document.getElementById('searchClose').addEventListener('click', closeSearch);
   document.getElementById('searchInput').addEventListener('input', (e) => filterSearch(e.target.value));
+  document.getElementById('searchClear').addEventListener('click', () => {
+    const input = document.getElementById('searchInput');
+    input.value = '';
+    filterSearch('');
+    input.focus();
+  });
 }
 
 function openSearch() {
   createSearchOverlay();
   loadSearchProducts();
   document.getElementById('searchOverlay').classList.add('open');
+  document.body.classList.add('search-open');
   setTimeout(() => document.getElementById('searchInput').focus(), 100);
 }
 
 function closeSearch() {
   const overlay = document.getElementById('searchOverlay');
   if (overlay) overlay.classList.remove('open');
+  document.body.classList.remove('search-open');
   const input = document.getElementById('searchInput');
   if (input) { input.value = ''; filterSearch(''); }
 }
 
 function loadSearchProducts() {
-  if (searchProducts) return;
+  if (searchProducts) { renderSearchResults(''); return; }
   fetch('/api/storefront/products')
     .then(r => r.json())
     .then(products => {
       searchProducts = products;
-      const el = document.getElementById('searchResults');
-      if (!el) return;
-      el.innerHTML = products.map(p => {
-        const price = '$' + (p.price_cents / 100).toFixed(0);
-        return `<a href="product.html?slug=${encodeURIComponent(p.slug)}" class="search-product" data-name="${p.name} ${p.detail || ''} ${p.category || ''}">
-          <div class="sp-img"><img src="${p.image_primary}" alt="${p.name}"></div>
-          <h4>${p.name}</h4>
-          <div class="sp-price">${price}</div>
-        </a>`;
-      }).join('');
+      renderSearchResults('');
     })
     .catch(() => {});
 }
 
-function filterSearch(q) {
-  const items = document.querySelectorAll('#searchResults .search-product');
+function renderSearchResults(q) {
+  const list = document.getElementById('searchResults');
+  const label = document.getElementById('searchLabel');
   const empty = document.getElementById('searchEmpty');
-  let visible = 0;
-  items.forEach(item => {
-    const match = !q || item.dataset.name.toLowerCase().includes(q.toLowerCase());
-    item.style.display = match ? '' : 'none';
-    if (match) visible++;
-  });
-  if (empty) empty.style.display = visible === 0 ? '' : 'none';
+  if (!list || !searchProducts) return;
+  const query = (q || '').trim().toLowerCase();
+  let items;
+  if (!query) {
+    label.textContent = 'Suggested';
+    items = searchProducts.filter(p => p.featured).slice(0, 6);
+    if (items.length === 0) items = searchProducts.slice(0, 6);
+  } else {
+    label.textContent = 'Results';
+    items = searchProducts.filter(p => {
+      const hay = `${p.name} ${p.detail || ''} ${p.category || ''}`.toLowerCase();
+      return hay.includes(query);
+    });
+  }
+  list.innerHTML = items.map(p =>
+    `<a href="product.html?slug=${encodeURIComponent(p.slug)}" class="search-result-name">${p.name}${p.detail ? ' — ' + p.detail : ''}</a>`
+  ).join('');
+  if (empty) empty.style.display = items.length === 0 ? '' : 'none';
+}
+
+function filterSearch(q) {
+  const clear = document.getElementById('searchClear');
+  if (clear) clear.classList.toggle('show', !!q);
+  renderSearchResults(q);
 }
 
 // ── Init ──

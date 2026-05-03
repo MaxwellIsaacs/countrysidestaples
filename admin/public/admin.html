@@ -264,6 +264,15 @@ input, textarea, select { font-family: 'Outfit', sans-serif; }
 
 .btn-primary:hover { opacity: 0.85; }
 
+.save-all-floating {
+  position: fixed;
+  top: 96px;
+  right: 32px;
+  z-index: 50;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(28,26,23,0.18);
+}
+
 .btn-secondary {
   padding: 10px 20px;
   background: none;
@@ -762,18 +771,29 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
 
     <!-- ── FEATURED ── -->
     <div class="tab-content" id="tab-featured">
-      <!-- Featured / New Arrivals -->
+      <button class="btn-primary save-all-floating" id="saveFeaturedBtn" onclick="saveFeatured()">Save All</button>
+
+      <!-- New Arrivals -->
       <div class="section-header">
         <div>
           <h1>New <em>Arrivals</em></h1>
-          <p style="font-size:13px;font-weight:300;color:var(--muted);margin-top:4px;">The products shown in the homepage grid. Pick your top picks.</p>
+          <p style="font-size:13px;font-weight:300;color:var(--muted);margin-top:4px;">Curated list shown as the New Arrivals collection. Set a title and select the products.</p>
         </div>
-        <button class="btn-primary" id="saveFeaturedBtn" onclick="saveFeatured()">Save All</button>
       </div>
-      <div class="table-wrap" style="margin-bottom:56px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div class="form-row" style="margin:0;">
+          <label style="display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Label</label>
+          <input type="text" id="newarrivals-label" placeholder="e.g. Just Dropped" style="width:100%;padding:10px 12px;font-size:13px;font-weight:300;border:1px solid rgba(28,26,23,0.15);background:transparent;color:var(--text);outline:none;font-family:'Outfit',sans-serif;">
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label style="display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Title (use &lt;em&gt; for italic)</label>
+          <input type="text" id="newarrivals-title" placeholder='e.g. New <em>Arrivals</em>' style="width:100%;padding:10px 12px;font-size:13px;font-weight:300;border:1px solid rgba(28,26,23,0.15);background:transparent;color:var(--text);outline:none;font-family:'Outfit',sans-serif;">
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-bottom:32px;">
         <table>
           <thead><tr><th style="width:40px;"></th><th>Product</th><th>Category</th><th>Price</th></tr></thead>
-          <tbody id="featuredBody"></tbody>
+          <tbody id="newarrivalsBody"></tbody>
         </table>
       </div>
 
@@ -1261,10 +1281,6 @@ async function loadFeatured() {
   try {
     const allProducts = await api('/api/products?archived=0');
 
-    // Featured
-    const featuredBody = document.getElementById('featuredBody');
-    featuredBody.innerHTML = allProducts.map(p => productCheckRow(p, 'featured-check', !!p.featured)).join('');
-
     // Lookbook
     const lookbookConfig = await api('/api/config/lookbook');
     const lb = lookbookConfig.value || { title: '', label: '', product_ids: [] };
@@ -1274,6 +1290,16 @@ async function loadFeatured() {
 
     const lookbookBody = document.getElementById('lookbookBody');
     lookbookBody.innerHTML = allProducts.map(p => productCheckRow(p, 'lookbook-check', lbIds.includes(p.id))).join('');
+
+    // New Arrivals
+    const newArrivalsConfig = await api('/api/config/new_arrivals');
+    const na = newArrivalsConfig.value || { title: '', label: '', product_ids: [] };
+    document.getElementById('newarrivals-label').value = na.label || '';
+    document.getElementById('newarrivals-title').value = na.title || '';
+    const naIds = na.product_ids || [];
+
+    const newarrivalsBody = document.getElementById('newarrivalsBody');
+    newarrivalsBody.innerHTML = allProducts.map(p => productCheckRow(p, 'newarrivals-check', naIds.includes(p.id))).join('');
   } catch (err) {
     console.error('Failed to load featured:', err);
   }
@@ -1284,18 +1310,6 @@ async function saveFeatured() {
   btn.textContent = 'Saving...';
 
   try {
-    // Save featured flags
-    const featuredIds = [];
-    document.querySelectorAll('.featured-check').forEach(c => { if (c.checked) featuredIds.push(parseInt(c.value)); });
-
-    const allProducts = await api('/api/products?archived=0');
-    for (const p of allProducts) {
-      const shouldBe = featuredIds.includes(p.id);
-      if (!!p.featured !== shouldBe) {
-        await api(`/api/products/${p.id}`, { method: 'PUT', body: { featured: shouldBe } });
-      }
-    }
-
     // Save lookbook config
     const lookbookIds = [];
     document.querySelectorAll('.lookbook-check').forEach(c => { if (c.checked) lookbookIds.push(parseInt(c.value)); });
@@ -1307,6 +1321,21 @@ async function saveFeatured() {
           label: document.getElementById('lookbook-label').value,
           title: document.getElementById('lookbook-title').value,
           product_ids: lookbookIds,
+        }
+      }
+    });
+
+    // Save new arrivals config
+    const newArrivalsIds = [];
+    document.querySelectorAll('.newarrivals-check').forEach(c => { if (c.checked) newArrivalsIds.push(parseInt(c.value)); });
+
+    await api('/api/config/new_arrivals', {
+      method: 'PUT',
+      body: {
+        value: {
+          label: document.getElementById('newarrivals-label').value,
+          title: document.getElementById('newarrivals-title').value,
+          product_ids: newArrivalsIds,
         }
       }
     });
