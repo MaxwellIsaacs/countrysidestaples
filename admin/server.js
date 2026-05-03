@@ -5,6 +5,7 @@ const cookieSession = require('cookie-session');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { sendMail, verifyEmailTemplate, resetPasswordTemplate } = require('./mailer');
 
 // ── Config ──
 const PORT = process.env.PORT || 3000;
@@ -12,7 +13,14 @@ const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const STRIPE_PUBLISHABLE = process.env.STRIPE_PUBLISHABLE_KEY || '';
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+if (IS_PROD && !process.env.SESSION_SECRET) {
+  console.error('FATAL: SESSION_SECRET must be set in production.');
+  process.exit(1);
+}
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h to confirm email
 
 // ── Database ──
 const DB_PATH = path.join(__dirname, 'data', 'store.db');
@@ -35,6 +43,24 @@ try { db.exec("ALTER TABLE products ADD COLUMN size_chart_type TEXT DEFAULT ''")
 try { db.exec("UPDATE products SET size_chart_enabled = 1, size_chart_type = 'shirt' WHERE (size_chart_type IS NULL OR size_chart_type = '') AND size_chart_enabled = 0"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN care_enabled INTEGER DEFAULT 0"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN care_type TEXT DEFAULT ''"); } catch {}
+
+// Email verification tokens. Hash is stored, never the raw token.
+db.exec(`CREATE TABLE IF NOT EXISTS email_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token_hash TEXT UNIQUE NOT NULL,
+  purpose TEXT NOT NULL,
+  email TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  used_at INTEGER,
+  created_at INTEGER NOT NULL
+)`);
+db.exec('CREATE INDEX IF NOT EXISTS idx_email_tokens_hash ON email_tokens(token_hash)');
+// Drop the older login_tokens table from a previous iteration if present.
+try { db.exec('DROP TABLE IF EXISTS login_tokens'); } catch {}
+try { db.exec('ALTER TABLE customers ADD COLUMN email_verified INTEGER DEFAULT 0'); } catch {}
+// Existing customers (created before verification existed) are grandfathered
+// in as verified so we don't lock anyone out.
+try { db.exec("UPDATE customers SET email_verified = 1 WHERE email_verified IS NULL OR email_verified = 0"); } catch {}
 try {
   const exists = db.prepare("SELECT value FROM site_config WHERE key = 'care_instructions'").get();
   if (!exists) {
@@ -134,12 +160,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve main site files from parent directory
 app.use(express.static(path.join(__dirname, '..')));
 
+app.set('trust proxy', 1);
 app.use(cookieSession({
   name: 'css_admin',
   secret: SESSION_SECRET,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   httpOnly: true,
   sameSite: 'lax',
+  secure: IS_PROD,
 }));
 
 // ── Auth middleware ──
@@ -148,8 +176,75 @@ function requireAuth(req, res, next) {
   next();
 }
 
+// ── Rate limiter (in-memory, per IP+key) ──
+// Sliding window. Sized for a single-process Node app — if you ever scale
+// horizontally, swap for Redis or a fronting proxy limiter.
+const rateBuckets = new Map();
+function rateLimit({ key, max, windowMs }) {
+  const now = Date.now();
+  const slot = rateBuckets.get(key) || [];
+  const fresh = slot.filter(t => now - t < windowMs);
+  if (fresh.length >= max) {
+    rateBuckets.set(key, fresh);
+    return { ok: false, retryMs: windowMs - (now - fresh[0]) };
+  }
+  fresh.push(now);
+  rateBuckets.set(key, fresh);
+  return { ok: true };
+}
+function clientIp(req) {
+  return (req.headers['x-forwarded-for']?.split(',')[0].trim()) || req.ip || req.socket.remoteAddress || 'unknown';
+}
+function loginLimiter(prefix) {
+  return (req, res, next) => {
+    const ip = clientIp(req);
+    const email = (req.body?.email || '').toLowerCase().trim();
+    const ipCheck = rateLimit({ key: `${prefix}:ip:${ip}`, max: 20, windowMs: 15 * 60 * 1000 });
+    if (!ipCheck.ok) return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+    if (email) {
+      const emailCheck = rateLimit({ key: `${prefix}:email:${email}`, max: 8, windowMs: 15 * 60 * 1000 });
+      if (!emailCheck.ok) return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+    }
+    next();
+  };
+}
+
+// ── Email-token helpers (verify-email, reset-password) ──
+function hashToken(raw) {
+  return crypto.createHash('sha256').update(raw).digest('hex');
+}
+function issueToken({ purpose, email, ttlMs, path, extra }) {
+  const raw = crypto.randomBytes(32).toString('base64url');
+  const hash = hashToken(raw);
+  const now = Date.now();
+  db.prepare(
+    'INSERT INTO email_tokens (token_hash, purpose, email, expires_at, created_at) VALUES (?, ?, ?, ?, ?)'
+  ).run(hash, purpose, email, now + ttlMs, now);
+  db.prepare('DELETE FROM email_tokens WHERE expires_at < ?').run(now - 7 * 24 * 60 * 60 * 1000);
+  const url = new URL(`${BASE_URL}${path}`);
+  url.searchParams.set('token', raw);
+  for (const [k, v] of Object.entries(extra || {})) url.searchParams.set(k, v);
+  return url.toString();
+}
+function consumeToken({ rawToken, purpose }) {
+  if (!rawToken) return { error: 'Missing token' };
+  const hash = hashToken(rawToken);
+  const row = db.prepare('SELECT * FROM email_tokens WHERE token_hash = ? AND purpose = ?').get(hash, purpose);
+  if (!row) return { error: 'Invalid or expired link' };
+  if (row.used_at) return { error: 'This link has already been used' };
+  if (row.expires_at < Date.now()) return { error: 'This link has expired' };
+  db.prepare('UPDATE email_tokens SET used_at = ? WHERE id = ?').run(Date.now(), row.id);
+  return { email: row.email };
+}
+function safeRedirect(target) {
+  if (!target || typeof target !== 'string') return null;
+  // Only allow same-origin relative paths — never open redirects.
+  if (!target.startsWith('/') || target.startsWith('//')) return null;
+  return target;
+}
+
 // ── Auth routes ──
-app.post('/api/login', (req, res) => {
+app.post('/api/login', loginLimiter('admin-pw'), (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
@@ -326,24 +421,61 @@ app.put('/api/orders/:id/status', requireAuth, (req, res) => {
 });
 
 // ── Customer auth (public) ──
-app.post('/api/account/signup', (req, res) => {
-  const { email, password, first_name, last_name } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
-  const existing = db.prepare('SELECT id FROM customers WHERE email = ?').get(email.toLowerCase().trim());
-  if (existing) return res.status(409).json({ error: 'An account with this email already exists' });
+// Build + send the verify-email message. Caller decides whether to expose
+// the dev link (signup/resend yes; login challenge yes — same email).
+async function sendVerifyEmail(email) {
+  const link = issueToken({
+    purpose: 'verify-email',
+    email,
+    ttlMs: VERIFY_TOKEN_TTL_MS,
+    path: '/api/account/verify-email',
+    extra: { redirect: '/account.html' },
+  });
+  const tpl = verifyEmailTemplate({ link });
+  return sendMail({ to: email, devLink: link, ...tpl });
+}
+
+app.post('/api/account/signup', loginLimiter('cust-signup'), async (req, res) => {
+  const { email: rawEmail, password, first_name, last_name } = req.body;
+  if (!rawEmail || !password) return res.status(400).json({ error: 'Email and password required' });
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  const email = rawEmail.toLowerCase().trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Valid email required' });
+
+  const existing = db.prepare('SELECT id, email_verified FROM customers WHERE email = ?').get(email);
+  if (existing) {
+    // If they previously signed up but never verified, let them resend rather
+    // than getting stuck. Don't reveal that the email already exists otherwise.
+    if (!existing.email_verified) {
+      try {
+        const result = await sendVerifyEmail(email);
+        const dev = !IS_PROD;
+        return res.json({ ok: true, pending_verification: true, ...(dev && result.devLink ? { devLink: result.devLink } : {}) });
+      } catch (err) {
+        console.error('Verify email send failed:', err.message);
+        return res.status(500).json({ error: 'Could not send verification email' });
+      }
+    }
+    return res.status(409).json({ error: 'An account with this email already exists' });
+  }
 
   const hash = bcrypt.hashSync(password, 10);
-  const result = db.prepare(
-    'INSERT INTO customers (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)'
-  ).run(email.toLowerCase().trim(), hash, first_name || '', last_name || '');
+  db.prepare(
+    'INSERT INTO customers (email, password_hash, first_name, last_name, email_verified) VALUES (?, ?, ?, ?, 0)'
+  ).run(email, hash, first_name || '', last_name || '');
 
-  req.session.customerId = result.lastInsertRowid;
-  res.json({ ok: true, customer: { id: result.lastInsertRowid, email: email.toLowerCase().trim(), first_name, last_name } });
+  try {
+    const result = await sendVerifyEmail(email);
+    const dev = !IS_PROD;
+    res.json({ ok: true, pending_verification: true, ...(dev && result.devLink ? { devLink: result.devLink } : {}) });
+  } catch (err) {
+    console.error('Verify email send failed:', err.message);
+    res.status(500).json({ error: 'Account created but could not send verification email. Try resending.' });
+  }
 });
 
-app.post('/api/account/login', (req, res) => {
+app.post('/api/account/login', loginLimiter('cust-pw'), (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
@@ -351,9 +483,79 @@ app.post('/api/account/login', (req, res) => {
   if (!customer || !bcrypt.compareSync(password, customer.password_hash)) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
+  if (!customer.email_verified) {
+    return res.status(403).json({ error: 'Please verify your email first', needs_verification: true });
+  }
 
   req.session.customerId = customer.id;
   res.json({ ok: true, customer: { id: customer.id, email: customer.email, first_name: customer.first_name, last_name: customer.last_name } });
+});
+
+app.post('/api/account/resend-verification', loginLimiter('cust-resend'), async (req, res) => {
+  const email = (req.body?.email || '').toLowerCase().trim();
+  if (!email) return res.status(400).json({ error: 'Email required' });
+  const customer = db.prepare('SELECT email, email_verified FROM customers WHERE email = ?').get(email);
+  const dev = !IS_PROD;
+  // Generic response — never reveal whether the email exists.
+  if (!customer || customer.email_verified) return res.json({ ok: true });
+  try {
+    const result = await sendVerifyEmail(customer.email);
+    res.json({ ok: true, ...(dev && result.devLink ? { devLink: result.devLink } : {}) });
+  } catch (err) {
+    console.error('Resend verification failed:', err.message);
+    res.status(500).json({ error: 'Could not send verification email' });
+  }
+});
+
+app.get('/api/account/verify-email', (req, res) => {
+  const result = consumeToken({ rawToken: req.query.token, purpose: 'verify-email' });
+  if (result.error) return res.status(400).send(result.error);
+  const customer = db.prepare('SELECT id FROM customers WHERE email = ?').get(result.email);
+  if (!customer) return res.status(400).send('Account no longer exists');
+  db.prepare('UPDATE customers SET email_verified = 1 WHERE id = ?').run(customer.id);
+  req.session.customerId = customer.id;
+  res.redirect(safeRedirect(req.query.redirect) || '/account.html');
+});
+
+// ── Forgot password / reset ──
+app.post('/api/account/forgot-password', loginLimiter('cust-forgot'), async (req, res) => {
+  const email = (req.body?.email || '').toLowerCase().trim();
+  if (!email) return res.status(400).json({ error: 'Email required' });
+  const customer = db.prepare('SELECT email FROM customers WHERE email = ?').get(email);
+  const dev = !IS_PROD;
+  // Generic ok — no enumeration.
+  if (!customer) return res.json({ ok: true });
+
+  const link = issueToken({
+    purpose: 'reset-password',
+    email: customer.email,
+    ttlMs: 60 * 60 * 1000, // 1h
+    path: '/account.html',
+    extra: { mode: 'reset' },
+  });
+  try {
+    const tpl = resetPasswordTemplate({ link });
+    const result = await sendMail({ to: customer.email, devLink: link, ...tpl });
+    res.json({ ok: true, ...(dev && result.devLink ? { devLink: result.devLink } : {}) });
+  } catch (err) {
+    console.error('Reset email send failed:', err.message);
+    res.status(500).json({ error: 'Could not send reset email' });
+  }
+});
+
+app.post('/api/account/reset-password', loginLimiter('cust-reset'), (req, res) => {
+  const { token, password } = req.body || {};
+  if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  const result = consumeToken({ rawToken: token, purpose: 'reset-password' });
+  if (result.error) return res.status(400).json({ error: result.error });
+  const customer = db.prepare('SELECT id, email FROM customers WHERE email = ?').get(result.email);
+  if (!customer) return res.status(400).json({ error: 'Account no longer exists' });
+
+  const hash = bcrypt.hashSync(password, 10);
+  // Resetting via emailed link also confirms ownership of the address.
+  db.prepare('UPDATE customers SET password_hash = ?, email_verified = 1 WHERE id = ?').run(hash, customer.id);
+  req.session.customerId = customer.id;
+  res.json({ ok: true, customer: { id: customer.id, email: customer.email } });
 });
 
 app.post('/api/account/logout', (req, res) => {
