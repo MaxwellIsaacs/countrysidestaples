@@ -337,7 +337,7 @@ footer .fc a:hover { color: var(--text); }
 </div>
 
 <div class="page-header">
-  <h1 id="shopTitle">All <em>Products</em></h1>
+  <h1 id="shopTitle"></h1>
   <div class="filter-bar">
     <span id="productCount"></span>
     <select id="categorySelect">
@@ -459,11 +459,14 @@ document.getElementById('sortSelect').addEventListener('change', applyFilters);
   const initial = params.get('filter') === 'bestsellers'
     ? 'bestsellers'
     : (params.get('category') || 'all');
-  document.getElementById('categorySelect').value = TITLES[initial] ? initial : 'all';
+  const startCat = TITLES[initial] ? initial : 'all';
+  document.getElementById('categorySelect').value = startCat;
+  // Paint the title immediately so there's no flash of the wrong heading
+  document.getElementById('shopTitle').innerHTML = TITLES[startCat] || TITLES.all;
 
   const [products, bestsellersConfig] = await Promise.all([
     fetch('/api/storefront/products').then(r => r.json()),
-    fetch('/api/storefront/new-arrivals').then(r => r.json()).catch(() => ({ product_ids: [] })),
+    fetch('/api/storefront/best-sellers').then(r => r.json()).catch(() => ({ product_ids: [] })),
   ]);
   allProducts = products;
   bestSellerIds = new Set(bestsellersConfig.product_ids || []);

@@ -60,6 +60,7 @@ try {
   }
 } catch {}
 try { db.exec("INSERT OR IGNORE INTO site_config (key, value) VALUES ('featured_ids', '[]')"); } catch {}
+try { db.exec("INSERT OR IGNORE INTO site_config (key, value) VALUES ('best_sellers', '{\"product_ids\":[]}')"); } catch {}
 
 // ── Stripe (lazy — only if key is set) ──
 let stripe = null;
@@ -192,6 +193,19 @@ app.put('/api/config/:key', requireAuth, (req, res) => {
   const { value } = req.body;
   db.prepare('INSERT OR REPLACE INTO site_config (key, value) VALUES (?, ?)').run(req.params.key, JSON.stringify(value));
   res.json({ ok: true });
+});
+
+app.get('/api/best-sellers/suggestions', requireAuth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT oi.product_id AS id, SUM(oi.quantity) AS qty
+    FROM order_items oi
+    JOIN products p ON p.id = oi.product_id
+    WHERE p.archived = 0 AND oi.product_id IS NOT NULL
+    GROUP BY oi.product_id
+    ORDER BY qty DESC, oi.product_id ASC
+    LIMIT 20
+  `).all();
+  res.json({ product_ids: rows.map(r => r.id) });
 });
 
 // ── Product routes ──
@@ -439,6 +453,11 @@ app.get('/api/storefront/care-instructions', (req, res) => {
 app.get('/api/storefront/new-arrivals', (req, res) => {
   const row = db.prepare("SELECT value FROM site_config WHERE key = 'new_arrivals'").get();
   res.json(row ? JSON.parse(row.value) : { title: '', label: '', product_ids: [] });
+});
+
+app.get('/api/storefront/best-sellers', (req, res) => {
+  const row = db.prepare("SELECT value FROM site_config WHERE key = 'best_sellers'").get();
+  res.json(row ? JSON.parse(row.value) : { product_ids: [] });
 });
 
 app.get('/api/storefront/products', (req, res) => {

@@ -307,6 +307,27 @@ input, textarea, select { font-family: 'Outfit', sans-serif; }
   letter-spacing: 1.5px;
 }
 
+.bs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-left: 4px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid rgba(28,26,23,0.2);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.bs-btn:hover:not(:disabled) { background: rgba(28,26,23,0.06); border-color: rgba(28,26,23,0.4); }
+.bs-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.bs-btn-danger:hover:not(:disabled) { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+
 /* ── STAT CARDS ── */
 .stat-grid {
   display: grid;
@@ -1020,6 +1041,29 @@ tr:hover .sc-td-action .sc-x { opacity: 1; }
           <tbody id="lookbookBody"></tbody>
         </table>
       </div>
+
+      <!-- Best Sellers -->
+      <div class="section-header" style="margin-top:48px;">
+        <div>
+          <h1>Best <em>Sellers</em></h1>
+          <p style="font-size:13px;font-weight:300;color:var(--muted);margin-top:4px;">Ranked list shown when shoppers click the Best Sellers nav filter. Defaults to the actual top sellers from your orders — override and reorder freely.</p>
+        </div>
+        <button type="button" class="btn-secondary btn-sm" onclick="resetBestSellersToSuggested()" style="font-size:10px;">Reset to suggested</button>
+      </div>
+      <div style="margin-bottom:12px;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Selected (in rank order)</div>
+      <div class="table-wrap" style="margin-bottom:24px;">
+        <table>
+          <thead><tr><th style="width:40px;">#</th><th>Product</th><th>Category</th><th>Price</th><th style="width:120px;text-align:right;">Order</th></tr></thead>
+          <tbody id="bestsellersSelectedBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-bottom:12px;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">All products</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:40px;"></th><th>Product</th><th>Category</th><th>Price</th></tr></thead>
+          <tbody id="bestsellersAllBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ── SETTINGS ── -->
@@ -1195,6 +1239,8 @@ let orders = [];
 let currentTab = 'dashboard';
 let editingProductId = null;
 let showingArchived = false;
+let bestSellerOrder = [];
+let bestSellerProductMap = {};
 
 // ── API helpers ──
 async function api(path, opts = {}) {
@@ -1592,8 +1638,103 @@ async function loadFeatured() {
 
     const newarrivalsBody = document.getElementById('newarrivalsBody');
     newarrivalsBody.innerHTML = allProducts.map(p => productCheckRow(p, 'newarrivals-check', naIds.includes(p.id))).join('');
+
+    // Best Sellers
+    bestSellerProductMap = {};
+    allProducts.forEach(p => { bestSellerProductMap[p.id] = p; });
+    const bestSellersConfig = await api('/api/config/best_sellers');
+    const bs = bestSellersConfig.value || {};
+    let bsIds = Array.isArray(bs.product_ids) ? bs.product_ids.filter(id => bestSellerProductMap[id]) : [];
+    if (!bsIds.length) {
+      try {
+        const sug = await api('/api/best-sellers/suggestions');
+        bsIds = (sug.product_ids || []).filter(id => bestSellerProductMap[id]);
+      } catch (e) { bsIds = []; }
+    }
+    bestSellerOrder = bsIds;
+    renderBestSellers();
   } catch (err) {
     console.error('Failed to load featured:', err);
+  }
+}
+
+function renderBestSellers() {
+  const selectedBody = document.getElementById('bestsellersSelectedBody');
+  const allBody = document.getElementById('bestsellersAllBody');
+  if (!selectedBody || !allBody) return;
+
+  if (!bestSellerOrder.length) {
+    selectedBody.innerHTML = `<tr><td colspan="5" style="padding:18px;text-align:center;color:var(--muted);font-size:12px;font-weight:300;">No products selected. Check rows below or click Reset to suggested.</td></tr>`;
+  } else {
+    selectedBody.innerHTML = bestSellerOrder.map((id, i) => {
+      const p = bestSellerProductMap[id];
+      if (!p) return '';
+      const isFirst = i === 0, isLast = i === bestSellerOrder.length - 1;
+      return `<tr>
+        <td style="font-weight:500;">${i + 1}</td>
+        <td>
+          <div class="product-name-cell">
+            ${p.image_primary ? `<img class="product-row-img" src="${esc(p.image_primary)}" alt="">` : '<div class="product-row-img"></div>'}
+            <div class="pn-text"><h4>${esc(p.name)}</h4><div class="pn-detail">${esc(p.detail)}</div></div>
+          </div>
+        </td>
+        <td style="text-transform:capitalize;">${esc(p.category)}</td>
+        <td class="price-cell">${fmtPrice(p.price_cents)}</td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button type="button" class="bs-btn" onclick="moveBestSeller(${id}, -1)" ${isFirst ? 'disabled' : ''} title="Move up" aria-label="Move up">↑</button>
+          <button type="button" class="bs-btn" onclick="moveBestSeller(${id}, 1)" ${isLast ? 'disabled' : ''} title="Move down" aria-label="Move down">↓</button>
+          <button type="button" class="bs-btn bs-btn-danger" onclick="removeFromBestSellers(${id})" title="Remove" aria-label="Remove">×</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  const selectedSet = new Set(bestSellerOrder);
+  const all = Object.values(bestSellerProductMap);
+  allBody.innerHTML = all.map(p => `<tr>
+    <td><input type="checkbox" class="bestsellers-check" value="${p.id}" ${selectedSet.has(p.id) ? 'checked' : ''} onchange="toggleBestSeller(${p.id}, this.checked)" style="width:16px;height:16px;accent-color:#1C1A17;cursor:pointer;"></td>
+    <td>
+      <div class="product-name-cell">
+        ${p.image_primary ? `<img class="product-row-img" src="${esc(p.image_primary)}" alt="">` : '<div class="product-row-img"></div>'}
+        <div class="pn-text"><h4>${esc(p.name)}</h4><div class="pn-detail">${esc(p.detail)}</div></div>
+      </div>
+    </td>
+    <td style="text-transform:capitalize;">${esc(p.category)}</td>
+    <td class="price-cell">${fmtPrice(p.price_cents)}</td>
+  </tr>`).join('');
+}
+
+function toggleBestSeller(id, checked) {
+  id = parseInt(id);
+  const idx = bestSellerOrder.indexOf(id);
+  if (checked && idx === -1) bestSellerOrder.push(id);
+  else if (!checked && idx !== -1) bestSellerOrder.splice(idx, 1);
+  renderBestSellers();
+}
+
+function removeFromBestSellers(id) {
+  id = parseInt(id);
+  const idx = bestSellerOrder.indexOf(id);
+  if (idx !== -1) bestSellerOrder.splice(idx, 1);
+  renderBestSellers();
+}
+
+function moveBestSeller(id, delta) {
+  id = parseInt(id);
+  const idx = bestSellerOrder.indexOf(id);
+  const target = idx + delta;
+  if (idx === -1 || target < 0 || target >= bestSellerOrder.length) return;
+  [bestSellerOrder[idx], bestSellerOrder[target]] = [bestSellerOrder[target], bestSellerOrder[idx]];
+  renderBestSellers();
+}
+
+async function resetBestSellersToSuggested() {
+  try {
+    const sug = await api('/api/best-sellers/suggestions');
+    bestSellerOrder = (sug.product_ids || []).filter(id => bestSellerProductMap[id]);
+    renderBestSellers();
+  } catch (err) {
+    alert('Error: ' + err.message);
   }
 }
 
@@ -1630,6 +1771,12 @@ async function saveFeatured() {
           product_ids: newArrivalsIds,
         }
       }
+    });
+
+    // Save best sellers config
+    await api('/api/config/best_sellers', {
+      method: 'PUT',
+      body: { value: { product_ids: bestSellerOrder.slice() } }
     });
 
     btn.textContent = 'Saved!';
