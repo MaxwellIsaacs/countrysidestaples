@@ -788,8 +788,16 @@ fetch(`/api/storefront/products/${encodeURIComponent(slug)}`)
     const accEl = document.getElementById('accordion');
     const sections = [];
     if (p.description) sections.push({ title: 'Description', content: p.description, open: true });
-    if (p.care) sections.push({ title: 'Care', content: p.care });
     if (p.design) sections.push({ title: 'Design', content: p.design });
+    if (p.care_enabled && p.care_type) {
+      try {
+        const careCfg = await fetch('/api/storefront/care-instructions').then(r => r.json());
+        const careText = careCfg[p.care_type];
+        if (careText) sections.push({ title: 'Care', content: careText });
+      } catch {}
+    } else if (p.care) {
+      sections.push({ title: 'Care', content: p.care });
+    }
     if (p.size_chart_enabled && p.size_chart_type) {
       try {
         const charts = await fetch('/api/storefront/size-charts').then(r => r.json());

@@ -1046,6 +1046,20 @@ tr:hover .sc-td-action .sc-x { opacity: 1; }
           <div id="sizeChartsEditor" style="display:flex;flex-direction:column;gap:20px;"></div>
         </div>
       </details>
+
+      <!-- Care Instructions -->
+      <details class="settings-section">
+        <summary>
+          <div>
+            <h2>Care <em>Instructions</em></h2>
+            <p>Reusable care text per material. Toggle per product in the product editor.</p>
+          </div>
+          <span class="settings-chev">▾</span>
+        </summary>
+        <div class="settings-body">
+          <div id="careInstructionsEditor" style="display:flex;flex-direction:column;gap:18px;"></div>
+        </div>
+      </details>
     </div>
   </div>
 </div>
@@ -1114,6 +1128,22 @@ tr:hover .sc-td-action .sc-x { opacity: 1; }
           <option value="hat">Hat</option>
         </select>
         <p style="font-size:11px;color:var(--muted);margin-top:6px;font-weight:300;">Chart contents are managed in <em>Settings → Size Charts</em>.</p>
+      </div>
+      <div class="form-row">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="pf-care-enabled" style="width:16px;height:16px;accent-color:#1C1A17;cursor:pointer;">
+          Show care instructions on product page
+        </label>
+      </div>
+      <div class="form-row" id="pf-care-type-row" style="display:none;">
+        <label>Care Type</label>
+        <select id="pf-care-type">
+          <option value="cotton">Cotton Tee</option>
+          <option value="waffle">Waffle Knit</option>
+          <option value="hoodie">Hoodie / Sweatshirt</option>
+          <option value="hat">Hat</option>
+        </select>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px;font-weight:300;">Care text is managed in <em>Settings → Care Instructions</em>.</p>
       </div>
       <div class="form-row-inline">
         <div class="form-row">
@@ -1349,6 +1379,10 @@ function openProductModal(product = null) {
   document.getElementById('pf-size-chart-enabled').checked = scEnabled;
   document.getElementById('pf-size-chart-type').value = product?.size_chart_type || 'shirt';
   document.getElementById('pf-size-chart-type-row').style.display = scEnabled ? '' : 'none';
+  const careEnabled = product ? !!product.care_enabled : false;
+  document.getElementById('pf-care-enabled').checked = careEnabled;
+  document.getElementById('pf-care-type').value = product?.care_type || 'cotton';
+  document.getElementById('pf-care-type-row').style.display = careEnabled ? '' : 'none';
   document.getElementById('pf-image-primary').value = product ? product.image_primary : '';
   document.getElementById('pf-image-hover').value = product ? product.image_hover : '';
   const gallery = product ? JSON.parse(product.gallery || '[]') : [];
@@ -1363,6 +1397,9 @@ function openProductModal(product = null) {
 
 document.getElementById('pf-size-chart-enabled').addEventListener('change', (e) => {
   document.getElementById('pf-size-chart-type-row').style.display = e.target.checked ? '' : 'none';
+});
+document.getElementById('pf-care-enabled').addEventListener('change', (e) => {
+  document.getElementById('pf-care-type-row').style.display = e.target.checked ? '' : 'none';
 });
 
 function closeProductModal() {
@@ -1388,6 +1425,8 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
     design: document.getElementById('pf-design').value,
     size_chart_enabled: document.getElementById('pf-size-chart-enabled').checked,
     size_chart_type: document.getElementById('pf-size-chart-type').value,
+    care_enabled: document.getElementById('pf-care-enabled').checked,
+    care_type: document.getElementById('pf-care-type').value,
     image_primary: document.getElementById('pf-image-primary').value,
     image_hover: document.getElementById('pf-image-hover').value,
     gallery: [document.getElementById('pf-image-3').value, document.getElementById('pf-image-4').value].filter(Boolean),
@@ -1740,13 +1779,40 @@ function closeConfirm() {
   document.querySelectorAll('.confirm-pop').forEach(p => p.remove());
 }
 
+const CARE_TYPES = [
+  { key: 'cotton', label: 'Cotton Tee' },
+  { key: 'waffle', label: 'Waffle Knit' },
+  { key: 'hoodie', label: 'Hoodie / Sweatshirt' },
+  { key: 'hat',    label: 'Hat' },
+];
+
+let careTexts = {};
+
+function renderCareEditor() {
+  const editor = document.getElementById('careInstructionsEditor');
+  editor.innerHTML = CARE_TYPES.map(t => `
+    <div data-care-type="${t.key}" style="border:1px solid var(--border);background:#fff;padding:16px 18px;">
+      <div style="font-family:'EB Garamond',serif;font-size:17px;color:var(--text);margin-bottom:10px;">${t.label}</div>
+      <textarea data-care-key="${t.key}" rows="3" style="width:100%;padding:10px 12px;font-size:13px;font-weight:300;line-height:1.6;font-family:'Outfit',sans-serif;border:1px solid var(--border);background:transparent;color:var(--text);outline:none;resize:vertical;">${esc(careTexts[t.key] || '')}</textarea>
+    </div>
+  `).join('');
+  editor.querySelectorAll('textarea').forEach(t => {
+    t.addEventListener('input', (e) => { careTexts[e.target.dataset.careKey] = e.target.value; });
+  });
+}
+
 async function loadSettings() {
   try {
-    const cfg = await api('/api/config/size_charts');
-    const charts = cfg.value || {};
+    const [scCfg, careCfg] = await Promise.all([
+      api('/api/config/size_charts'),
+      api('/api/config/care_instructions'),
+    ]);
+    const charts = scCfg.value || {};
     sizeChartGrids = {};
     SIZE_CHART_TYPES.forEach(t => { sizeChartGrids[t.key] = parseChart(charts[t.key] || ''); });
     renderAllSizeCharts();
+    careTexts = careCfg.value || {};
+    renderCareEditor();
   } catch (err) {
     console.error('Failed to load settings:', err);
   }
@@ -1759,6 +1825,7 @@ async function saveSettings() {
     const charts = {};
     SIZE_CHART_TYPES.forEach(t => { charts[t.key] = serializeChart(sizeChartGrids[t.key]); });
     await api('/api/config/size_charts', { method: 'PUT', body: { value: charts } });
+    await api('/api/config/care_instructions', { method: 'PUT', body: { value: careTexts } });
     btn.textContent = 'Saved!';
     setTimeout(() => { btn.textContent = 'Save Settings'; }, 1500);
   } catch (err) {

@@ -31,6 +31,20 @@ try { db.exec('ALTER TABLE products ADD COLUMN archived INTEGER DEFAULT 0'); } c
 try { db.exec("ALTER TABLE products ADD COLUMN size_chart TEXT DEFAULT ''"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN size_chart_enabled INTEGER DEFAULT 0"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN size_chart_type TEXT DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE products ADD COLUMN care_enabled INTEGER DEFAULT 0"); } catch {}
+try { db.exec("ALTER TABLE products ADD COLUMN care_type TEXT DEFAULT ''"); } catch {}
+try {
+  const exists = db.prepare("SELECT value FROM site_config WHERE key = 'care_instructions'").get();
+  if (!exists) {
+    const defaults = {
+      cotton: 'Machine wash cold with like colors. Tumble dry low. Do not bleach. Iron on low heat if needed. Do not dry clean.',
+      waffle: 'Machine wash cold inside out. Lay flat to dry to preserve texture. Do not bleach. Iron on low if needed. Do not dry clean.',
+      hoodie: 'Machine wash cold inside out with like colors. Tumble dry low or hang dry. Do not bleach. Wash separately first time.',
+      hat: 'Spot clean only. Do not machine wash. Reshape and air dry. Avoid prolonged sun exposure.',
+    };
+    db.prepare("INSERT INTO site_config (key, value) VALUES ('care_instructions', ?)").run(JSON.stringify(defaults));
+  }
+} catch {}
 try {
   const exists = db.prepare("SELECT value FROM site_config WHERE key = 'size_charts'").get();
   if (!exists) {
@@ -186,7 +200,7 @@ app.get('/api/products', requireAuth, (req, res) => {
 });
 
 app.post('/api/products', requireAuth, (req, res) => {
-  const { name, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, in_stock, featured, sort_order } = req.body;
+  const { name, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, care_enabled, care_type, in_stock, featured, sort_order } = req.body;
   if (!name || !price_cents) return res.status(400).json({ error: 'Name and price required' });
 
   const slug = (req.body.slug || name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -198,8 +212,8 @@ app.post('/api/products', requireAuth, (req, res) => {
   }
 
   const result = db.prepare(`
-    INSERT INTO products (name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, in_stock, featured, sort_order)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, care_enabled, care_type, in_stock, featured, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     name, finalSlug, detail || '', price_cents, description || '', care || '', design || '',
     JSON.stringify(sizes || ['XS','S','M','L','XL','XXL']),
@@ -207,6 +221,8 @@ app.post('/api/products', requireAuth, (req, res) => {
     JSON.stringify(gallery || []),
     size_chart_enabled === undefined ? 1 : (size_chart_enabled ? 1 : 0),
     size_chart_type || 'shirt',
+    care_enabled ? 1 : 0,
+    care_type || 'cotton',
     in_stock !== undefined ? (in_stock ? 1 : 0) : 1,
     featured ? 1 : 0,
     sort_order || 0
@@ -220,10 +236,10 @@ app.put('/api/products/:id', requireAuth, (req, res) => {
   const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
-  const { name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, in_stock, featured, sort_order } = req.body;
+  const { name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, care_enabled, care_type, in_stock, featured, sort_order } = req.body;
 
   db.prepare(`
-    UPDATE products SET name=?, slug=?, detail=?, price_cents=?, description=?, care=?, design=?, sizes=?, category=?, image_primary=?, image_hover=?, gallery=?, size_chart_enabled=?, size_chart_type=?, in_stock=?, featured=?, sort_order=?
+    UPDATE products SET name=?, slug=?, detail=?, price_cents=?, description=?, care=?, design=?, sizes=?, category=?, image_primary=?, image_hover=?, gallery=?, size_chart_enabled=?, size_chart_type=?, care_enabled=?, care_type=?, in_stock=?, featured=?, sort_order=?
     WHERE id=?
   `).run(
     name ?? existing.name,
@@ -240,6 +256,8 @@ app.put('/api/products/:id', requireAuth, (req, res) => {
     gallery !== undefined ? JSON.stringify(gallery) : existing.gallery,
     size_chart_enabled !== undefined ? (size_chart_enabled ? 1 : 0) : existing.size_chart_enabled,
     size_chart_type ?? existing.size_chart_type,
+    care_enabled !== undefined ? (care_enabled ? 1 : 0) : existing.care_enabled,
+    care_type ?? existing.care_type,
     in_stock !== undefined ? (in_stock ? 1 : 0) : existing.in_stock,
     featured !== undefined ? (featured ? 1 : 0) : existing.featured,
     sort_order ?? existing.sort_order,
@@ -408,6 +426,11 @@ app.get('/api/storefront/lookbook', (req, res) => {
 
 app.get('/api/storefront/size-charts', (req, res) => {
   const row = db.prepare("SELECT value FROM site_config WHERE key = 'size_charts'").get();
+  res.json(row ? JSON.parse(row.value) : {});
+});
+
+app.get('/api/storefront/care-instructions', (req, res) => {
+  const row = db.prepare("SELECT value FROM site_config WHERE key = 'care_instructions'").get();
   res.json(row ? JSON.parse(row.value) : {});
 });
 
