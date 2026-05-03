@@ -28,6 +28,21 @@ db.exec(schema);
 
 // Migrations — add columns that may not exist
 try { db.exec('ALTER TABLE products ADD COLUMN archived INTEGER DEFAULT 0'); } catch {}
+try { db.exec("ALTER TABLE products ADD COLUMN size_chart TEXT DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE products ADD COLUMN size_chart_enabled INTEGER DEFAULT 0"); } catch {}
+try { db.exec("ALTER TABLE products ADD COLUMN size_chart_type TEXT DEFAULT ''"); } catch {}
+try {
+  const exists = db.prepare("SELECT value FROM site_config WHERE key = 'size_charts'").get();
+  if (!exists) {
+    const defaults = {
+      shirt: 'Size | Chest | Length | Sleeve\nXS | 17 | 26 | 7.5\nS  | 18 | 27 | 8\nM  | 20 | 28 | 8.5\nL  | 22 | 29 | 9\nXL | 24 | 30 | 9.5\nXXL| 26 | 31 | 10',
+      hoodie: 'Size | Chest | Length | Sleeve\nXS | 20 | 27 | 24\nS  | 21 | 28 | 24.5\nM  | 23 | 29 | 25\nL  | 25 | 30 | 25.5\nXL | 27 | 31 | 26\nXXL| 29 | 32 | 26.5',
+      pants: 'Size | Waist | Inseam | Outseam\nXS | 26 | 30 | 39\nS  | 28 | 30 | 39\nM  | 30 | 31 | 40\nL  | 32 | 31 | 40\nXL | 34 | 32 | 41\nXXL| 36 | 32 | 41',
+      hat: 'One Size | Circumference | Adjustable\nOS | 22-24" | Yes',
+    };
+    db.prepare("INSERT INTO site_config (key, value) VALUES ('size_charts', ?)").run(JSON.stringify(defaults));
+  }
+} catch {}
 try { db.exec("INSERT OR IGNORE INTO site_config (key, value) VALUES ('featured_ids', '[]')"); } catch {}
 
 // ── Stripe (lazy — only if key is set) ──
@@ -171,7 +186,7 @@ app.get('/api/products', requireAuth, (req, res) => {
 });
 
 app.post('/api/products', requireAuth, (req, res) => {
-  const { name, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, in_stock, featured, sort_order } = req.body;
+  const { name, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, in_stock, featured, sort_order } = req.body;
   if (!name || !price_cents) return res.status(400).json({ error: 'Name and price required' });
 
   const slug = (req.body.slug || name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -183,13 +198,15 @@ app.post('/api/products', requireAuth, (req, res) => {
   }
 
   const result = db.prepare(`
-    INSERT INTO products (name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, in_stock, featured, sort_order)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, in_stock, featured, sort_order)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     name, finalSlug, detail || '', price_cents, description || '', care || '', design || '',
     JSON.stringify(sizes || ['XS','S','M','L','XL','XXL']),
     category || 'tops', image_primary || '', image_hover || '',
     JSON.stringify(gallery || []),
+    size_chart_enabled ? 1 : 0,
+    size_chart_type || '',
     in_stock !== undefined ? (in_stock ? 1 : 0) : 1,
     featured ? 1 : 0,
     sort_order || 0
@@ -203,10 +220,10 @@ app.put('/api/products/:id', requireAuth, (req, res) => {
   const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
-  const { name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, in_stock, featured, sort_order } = req.body;
+  const { name, slug, detail, price_cents, description, care, design, sizes, category, image_primary, image_hover, gallery, size_chart_enabled, size_chart_type, in_stock, featured, sort_order } = req.body;
 
   db.prepare(`
-    UPDATE products SET name=?, slug=?, detail=?, price_cents=?, description=?, care=?, design=?, sizes=?, category=?, image_primary=?, image_hover=?, gallery=?, in_stock=?, featured=?, sort_order=?
+    UPDATE products SET name=?, slug=?, detail=?, price_cents=?, description=?, care=?, design=?, sizes=?, category=?, image_primary=?, image_hover=?, gallery=?, size_chart_enabled=?, size_chart_type=?, in_stock=?, featured=?, sort_order=?
     WHERE id=?
   `).run(
     name ?? existing.name,
@@ -221,6 +238,8 @@ app.put('/api/products/:id', requireAuth, (req, res) => {
     image_primary ?? existing.image_primary,
     image_hover ?? existing.image_hover,
     gallery !== undefined ? JSON.stringify(gallery) : existing.gallery,
+    size_chart_enabled !== undefined ? (size_chart_enabled ? 1 : 0) : existing.size_chart_enabled,
+    size_chart_type ?? existing.size_chart_type,
     in_stock !== undefined ? (in_stock ? 1 : 0) : existing.in_stock,
     featured !== undefined ? (featured ? 1 : 0) : existing.featured,
     sort_order ?? existing.sort_order,
@@ -385,6 +404,11 @@ app.post('/api/checkout', async (req, res) => {
 app.get('/api/storefront/lookbook', (req, res) => {
   const row = db.prepare("SELECT value FROM site_config WHERE key = 'lookbook'").get();
   res.json(row ? JSON.parse(row.value) : { title: '', label: '', product_ids: [] });
+});
+
+app.get('/api/storefront/size-charts', (req, res) => {
+  const row = db.prepare("SELECT value FROM site_config WHERE key = 'size_charts'").get();
+  res.json(row ? JSON.parse(row.value) : {});
 });
 
 app.get('/api/storefront/new-arrivals', (req, res) => {

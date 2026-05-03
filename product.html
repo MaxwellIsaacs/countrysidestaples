@@ -691,6 +691,19 @@ toggle.addEventListener('click', () => setMenu(!dropdown.classList.contains('ope
 dropdown.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
 
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderSizeChart(text) {
+  const rows = String(text).split(/\r?\n/).map(r => r.trim()).filter(Boolean).map(r => r.split('|').map(c => c.trim()));
+  if (!rows.length) return '';
+  const [header, ...body] = rows;
+  const thead = '<thead><tr>' + header.map(c => `<th>${escapeHtml(c)}</th>`).join('') + '</tr></thead>';
+  const tbody = '<tbody>' + body.map(r => '<tr>' + r.map(c => `<td>${escapeHtml(c)}</td>`).join('') + '</tr>').join('') + '</tbody>';
+  return `<table class="size-table">${thead}${tbody}</table>`;
+}
+
 function selectSize(btn) {
   document.querySelectorAll('.size-options button').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
@@ -741,7 +754,7 @@ document.querySelector('.add-to-cart').addEventListener('click', () => {
 // Load product
 fetch(`/api/storefront/products/${encodeURIComponent(slug)}`)
   .then(r => { if (!r.ok) throw new Error('Not found'); return r.json(); })
-  .then(p => {
+  .then(async p => {
     currentProduct = p;
     document.title = `${p.name} — Countryside Staples`;
     document.getElementById('productTitle').textContent = p.name;
@@ -769,12 +782,21 @@ fetch(`/api/storefront/products/${encodeURIComponent(slug)}`)
       `<button${i === Math.floor(sizes.length / 2) ? ' class="selected"' : ''} onclick="selectSize(this)">${s}</button>`
     ).join('');
 
+    // (helper for size chart defined outside)
+
     // Accordion
     const accEl = document.getElementById('accordion');
     const sections = [];
     if (p.description) sections.push({ title: 'Description', content: p.description, open: true });
     if (p.care) sections.push({ title: 'Care', content: p.care });
     if (p.design) sections.push({ title: 'Design', content: p.design });
+    if (p.size_chart_enabled && p.size_chart_type) {
+      try {
+        const charts = await fetch('/api/storefront/size-charts').then(r => r.json());
+        const raw = charts[p.size_chart_type];
+        if (raw) sections.push({ title: 'Size Chart', content: renderSizeChart(raw) });
+      } catch {}
+    }
     accEl.innerHTML = sections.map(s =>
       `<details class="acc-item"${s.open ? ' open' : ''}><summary>${s.title}</summary><div class="acc-content">${s.content}</div></details>`
     ).join('');

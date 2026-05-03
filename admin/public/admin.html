@@ -707,6 +707,7 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
         <button data-tab="products">Products</button>
         <button data-tab="orders">Orders</button>
         <button data-tab="featured">Featured</button>
+        <button data-tab="settings">Settings</button>
       </div>
     </div>
     <div class="nav-right">
@@ -834,6 +835,25 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
         </table>
       </div>
     </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="tab-content" id="tab-settings">
+      <button class="btn-primary save-all-floating" id="saveSettingsBtn" onclick="saveSettings()">Save Settings</button>
+
+      <div class="section-header">
+        <div>
+          <h1>Site-Wide <em>Configurations</em></h1>
+          <p style="font-size:13px;font-weight:300;color:var(--muted);margin-top:4px;">Settings shared across the storefront. Edit once, applied everywhere.</p>
+        </div>
+      </div>
+
+      <!-- Size Charts -->
+      <div style="margin-bottom:48px;">
+        <h2 style="font-family:'EB Garamond',serif;font-size:22px;font-weight:400;margin-bottom:6px;">Size <em>Charts</em></h2>
+        <p style="font-size:13px;font-weight:300;color:var(--muted);margin-bottom:18px;">Edit the chart for each garment type. Pipe-delimited rows; first row is the header. Toggle per product in the product editor.</p>
+        <div id="sizeChartsEditor" style="display:flex;flex-direction:column;gap:20px;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -885,6 +905,22 @@ tbody tr:hover { background: rgba(28, 26, 23, 0.015); }
       <div class="form-row">
         <label>Design Details</label>
         <textarea id="pf-design" placeholder="100% premium cotton..." style="min-height:50px;"></textarea>
+      </div>
+      <div class="form-row">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="pf-size-chart-enabled" style="width:16px;height:16px;accent-color:#1C1A17;cursor:pointer;">
+          Show size chart on product page
+        </label>
+      </div>
+      <div class="form-row" id="pf-size-chart-type-row" style="display:none;">
+        <label>Size Chart Type</label>
+        <select id="pf-size-chart-type">
+          <option value="shirt">Shirt / Tee</option>
+          <option value="hoodie">Hoodie / Sweatshirt</option>
+          <option value="pants">Pants / Sweats</option>
+          <option value="hat">Hat</option>
+        </select>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px;font-weight:300;">Chart contents are managed in <em>Settings → Size Charts</em>.</p>
       </div>
       <div class="form-row-inline">
         <div class="form-row">
@@ -1009,6 +1045,7 @@ function switchTab(tab) {
   if (tab === 'products') loadProducts();
   if (tab === 'orders') loadOrders();
   if (tab === 'featured') loadFeatured();
+  if (tab === 'settings') loadSettings();
 }
 
 // ── Greeting ──
@@ -1115,6 +1152,10 @@ function openProductModal(product = null) {
   document.getElementById('pf-description').value = product ? product.description : '';
   document.getElementById('pf-care').value = product ? product.care : '';
   document.getElementById('pf-design').value = product ? product.design : '';
+  const scEnabled = product ? !!product.size_chart_enabled : false;
+  document.getElementById('pf-size-chart-enabled').checked = scEnabled;
+  document.getElementById('pf-size-chart-type').value = product?.size_chart_type || 'shirt';
+  document.getElementById('pf-size-chart-type-row').style.display = scEnabled ? '' : 'none';
   document.getElementById('pf-image-primary').value = product ? product.image_primary : '';
   document.getElementById('pf-image-hover').value = product ? product.image_hover : '';
   const gallery = product ? JSON.parse(product.gallery || '[]') : [];
@@ -1126,6 +1167,10 @@ function openProductModal(product = null) {
 
   document.getElementById('productModal').classList.add('open');
 }
+
+document.getElementById('pf-size-chart-enabled').addEventListener('change', (e) => {
+  document.getElementById('pf-size-chart-type-row').style.display = e.target.checked ? '' : 'none';
+});
 
 function closeProductModal() {
   document.getElementById('productModal').classList.remove('open');
@@ -1148,6 +1193,8 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
     description: document.getElementById('pf-description').value,
     care: document.getElementById('pf-care').value,
     design: document.getElementById('pf-design').value,
+    size_chart_enabled: document.getElementById('pf-size-chart-enabled').checked,
+    size_chart_type: document.getElementById('pf-size-chart-type').value,
     image_primary: document.getElementById('pf-image-primary').value,
     image_hover: document.getElementById('pf-image-hover').value,
     gallery: [document.getElementById('pf-image-3').value, document.getElementById('pf-image-4').value].filter(Boolean),
@@ -1358,6 +1405,47 @@ async function saveFeatured() {
   } catch (err) {
     alert('Error: ' + err.message);
     btn.textContent = 'Save All';
+  }
+}
+
+// ── Settings (site-wide config) ──
+const SIZE_CHART_TYPES = [
+  { key: 'shirt',  label: 'Shirt / Tee' },
+  { key: 'hoodie', label: 'Hoodie / Sweatshirt' },
+  { key: 'pants',  label: 'Pants / Sweats' },
+  { key: 'hat',    label: 'Hat' },
+];
+
+async function loadSettings() {
+  try {
+    const cfg = await api('/api/config/size_charts');
+    const charts = cfg.value || {};
+    const editor = document.getElementById('sizeChartsEditor');
+    editor.innerHTML = SIZE_CHART_TYPES.map(t => `
+      <div>
+        <label style="display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">${t.label}</label>
+        <textarea data-sc-type="${t.key}" style="width:100%;min-height:130px;padding:10px 12px;font-family:'JetBrains Mono', ui-monospace, monospace;font-size:12px;line-height:1.5;border:1px solid rgba(28,26,23,0.15);background:transparent;color:var(--text);outline:none;">${esc(charts[t.key] || '')}</textarea>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Failed to load settings:', err);
+  }
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('saveSettingsBtn');
+  btn.textContent = 'Saving...';
+  try {
+    const charts = {};
+    document.querySelectorAll('#sizeChartsEditor textarea').forEach(t => {
+      charts[t.dataset.scType] = t.value;
+    });
+    await api('/api/config/size_charts', { method: 'PUT', body: { value: charts } });
+    btn.textContent = 'Saved!';
+    setTimeout(() => { btn.textContent = 'Save Settings'; }, 1500);
+  } catch (err) {
+    alert('Error: ' + err.message);
+    btn.textContent = 'Save Settings';
   }
 }
 

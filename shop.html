@@ -337,7 +337,7 @@ footer .fc a:hover { color: var(--text); }
 </div>
 
 <div class="page-header">
-  <h1 id="shopTitle">All</h1>
+  <h1 id="shopTitle">All <em>Products</em></h1>
   <div class="filter-bar">
     <span id="productCount"></span>
     <select id="categorySelect">
@@ -407,12 +407,12 @@ let allProducts = [];
 let bestSellerIds = new Set();
 
 const TITLES = {
-  all: 'All',
-  hats: 'Hats',
-  tops: 'Tops',
-  hoodies: 'Hoodies',
-  bottoms: 'Bottoms',
-  bestsellers: 'Best Sellers',
+  all: 'All <em>Products</em>',
+  hats: 'All <em>Hats</em>',
+  tops: 'All <em>Tops</em>',
+  hoodies: 'All <em>Hoodies</em>',
+  bottoms: 'All <em>Bottoms</em>',
+  bestsellers: 'Best <em>Sellers</em>',
 };
 
 function renderProducts(products) {
@@ -441,7 +441,7 @@ function applyFilters() {
   else if (sort === 'newest') sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   else sorted.sort((a, b) => a.sort_order - b.sort_order);
 
-  document.getElementById('shopTitle').textContent = TITLES[cat] || 'All';
+  document.getElementById('shopTitle').innerHTML = TITLES[cat] || TITLES.all;
   renderProducts(sorted);
 
   const url = new URL(window.location);

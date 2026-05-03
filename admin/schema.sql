@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS products (
   image_primary TEXT DEFAULT '',
   image_hover TEXT DEFAULT '',
   gallery TEXT DEFAULT '[]',
+  size_chart TEXT DEFAULT '',
   in_stock INTEGER DEFAULT 1,
   featured INTEGER DEFAULT 0,
   archived INTEGER DEFAULT 0,
