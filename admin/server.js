@@ -31,6 +31,8 @@ try { db.exec('ALTER TABLE products ADD COLUMN archived INTEGER DEFAULT 0'); } c
 try { db.exec("ALTER TABLE products ADD COLUMN size_chart TEXT DEFAULT ''"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN size_chart_enabled INTEGER DEFAULT 0"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN size_chart_type TEXT DEFAULT ''"); } catch {}
+// Backfill: rows that were never explicitly configured (no chart type set) get the default ON
+try { db.exec("UPDATE products SET size_chart_enabled = 1, size_chart_type = 'shirt' WHERE (size_chart_type IS NULL OR size_chart_type = '') AND size_chart_enabled = 0"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN care_enabled INTEGER DEFAULT 0"); } catch {}
 try { db.exec("ALTER TABLE products ADD COLUMN care_type TEXT DEFAULT ''"); } catch {}
 try {
