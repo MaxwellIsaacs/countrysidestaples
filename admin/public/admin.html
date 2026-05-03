@@ -745,6 +745,49 @@ tr:hover .sc-td-action .sc-x { opacity: 1; }
 }
 .sc-btn:hover { color: var(--text); border-color: var(--text); }
 
+/* Inline confirm popover */
+.confirm-pop {
+  position: absolute;
+  z-index: 1000;
+  background: #1C1A17;
+  color: #F6F3EF;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(28,26,23,0.25);
+  animation: confirmPopIn 0.14s ease;
+}
+.confirm-pop::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 14px;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #1C1A17;
+}
+.confirm-pop button {
+  border: none;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.confirm-pop button:hover { opacity: 0.85; }
+.confirm-pop .cp-yes { background: #d44; color: #fff; }
+.confirm-pop .cp-no { background: transparent; color: rgba(246,243,239,0.6); padding: 4px 4px; }
+@keyframes confirmPopIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
 /* ── SETTINGS COLLAPSIBLE ── */
 .settings-section {
   border: 1px solid var(--border);
@@ -1646,16 +1689,22 @@ function attachSizeChartHandlers() {
         else grid.rows[r][c] = e.target.value;
       });
     });
-    wrap.querySelectorAll('.sc-del-col').forEach(btn => btn.addEventListener('click', () => {
-      const c = parseInt(btn.dataset.c, 10);
-      grid.headers.splice(c, 1);
-      grid.rows.forEach(r => r.splice(c, 1));
-      wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+    wrap.querySelectorAll('.sc-del-col').forEach(btn => btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      confirmAt(btn, 'Delete column?', () => {
+        const c = parseInt(btn.dataset.c, 10);
+        grid.headers.splice(c, 1);
+        grid.rows.forEach(r => r.splice(c, 1));
+        wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+      });
     }));
-    wrap.querySelectorAll('.sc-del-row').forEach(btn => btn.addEventListener('click', () => {
-      const r = parseInt(btn.dataset.r, 10);
-      grid.rows.splice(r, 1);
-      wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+    wrap.querySelectorAll('.sc-del-row').forEach(btn => btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      confirmAt(btn, 'Delete row?', () => {
+        const r = parseInt(btn.dataset.r, 10);
+        grid.rows.splice(r, 1);
+        wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
+      });
     }));
     wrap.querySelector('.sc-add-row').addEventListener('click', () => {
       grid.rows.push(grid.headers.map(() => ''));
@@ -1667,6 +1716,28 @@ function attachSizeChartHandlers() {
       wrap.innerHTML = renderSizeChartGrid(typeKey); attachSizeChartHandlers();
     });
   });
+}
+
+function confirmAt(anchor, message, onYes) {
+  closeConfirm();
+  const pop = document.createElement('div');
+  pop.className = 'confirm-pop';
+  pop.innerHTML = `<span>${esc(message)}</span><button type="button" class="cp-yes">Delete</button><button type="button" class="cp-no">Cancel</button>`;
+  document.body.appendChild(pop);
+  const rect = anchor.getBoundingClientRect();
+  pop.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+  pop.style.left = (rect.left + window.scrollX - 8) + 'px';
+
+  const close = () => closeConfirm();
+  pop.querySelector('.cp-yes').addEventListener('click', (e) => { e.stopPropagation(); close(); onYes(); });
+  pop.querySelector('.cp-no').addEventListener('click', (e) => { e.stopPropagation(); close(); });
+  setTimeout(() => document.addEventListener('click', close, { once: true }), 0);
+  document.addEventListener('keydown', escClose);
+  function escClose(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escClose); } }
+}
+
+function closeConfirm() {
+  document.querySelectorAll('.confirm-pop').forEach(p => p.remove());
 }
 
 async function loadSettings() {
