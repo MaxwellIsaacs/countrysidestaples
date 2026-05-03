@@ -337,9 +337,17 @@ footer .fc a:hover { color: var(--text); }
 </div>
 
 <div class="page-header">
-  <h1>All <em>Products</em></h1>
+  <h1 id="shopTitle">All</h1>
   <div class="filter-bar">
     <span id="productCount"></span>
+    <select id="categorySelect">
+      <option value="all">All</option>
+      <option value="hats">Hats</option>
+      <option value="tops">Tops</option>
+      <option value="hoodies">Hoodies</option>
+      <option value="bottoms">Bottoms</option>
+      <option value="bestsellers">Best Sellers</option>
+    </select>
     <select id="sortSelect">
       <option value="featured">Sort by: Featured</option>
       <option value="price-asc">Price: Low to High</option>
@@ -396,28 +404,71 @@ function cardHTML(p) {
 }
 
 let allProducts = [];
+let bestSellerIds = new Set();
+
+const TITLES = {
+  all: 'All',
+  hats: 'Hats',
+  tops: 'Tops',
+  hoodies: 'Hoodies',
+  bottoms: 'Bottoms',
+  bestsellers: 'Best Sellers',
+};
 
 function renderProducts(products) {
   const grid = document.getElementById('shopGrid');
   grid.innerHTML = products.map(cardHTML).join('');
-  document.getElementById('productCount').textContent = products.length + ' products';
+  document.getElementById('productCount').textContent = products.length + ' product' + (products.length === 1 ? '' : 's');
   grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 }
 
-function sortProducts(key) {
-  const sorted = [...allProducts];
-  if (key === 'price-asc') sorted.sort((a, b) => a.price_cents - b.price_cents);
-  else if (key === 'price-desc') sorted.sort((a, b) => b.price_cents - a.price_cents);
-  else if (key === 'newest') sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+function applyFilters() {
+  const cat = document.getElementById('categorySelect').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = allProducts;
+  if (cat === 'bestsellers') {
+    filtered = bestSellerIds.size
+      ? allProducts.filter(p => bestSellerIds.has(p.id))
+      : allProducts.filter(p => p.featured);
+  } else if (cat !== 'all') {
+    filtered = allProducts.filter(p => (p.category || '').toLowerCase() === cat);
+  }
+
+  const sorted = [...filtered];
+  if (sort === 'price-asc') sorted.sort((a, b) => a.price_cents - b.price_cents);
+  else if (sort === 'price-desc') sorted.sort((a, b) => b.price_cents - a.price_cents);
+  else if (sort === 'newest') sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   else sorted.sort((a, b) => a.sort_order - b.sort_order);
+
+  document.getElementById('shopTitle').textContent = TITLES[cat] || 'All';
   renderProducts(sorted);
+
+  const url = new URL(window.location);
+  if (cat === 'all') { url.searchParams.delete('category'); url.searchParams.delete('filter'); }
+  else if (cat === 'bestsellers') { url.searchParams.delete('category'); url.searchParams.set('filter', 'bestsellers'); }
+  else { url.searchParams.delete('filter'); url.searchParams.set('category', cat); }
+  window.history.replaceState({}, '', url);
 }
 
-document.getElementById('sortSelect').addEventListener('change', (e) => sortProducts(e.target.value));
+document.getElementById('categorySelect').addEventListener('change', applyFilters);
+document.getElementById('sortSelect').addEventListener('change', applyFilters);
 
-fetch('/api/storefront/products')
-  .then(r => r.json())
-  .then(products => { allProducts = products; renderProducts(products); });
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const initial = params.get('filter') === 'bestsellers'
+    ? 'bestsellers'
+    : (params.get('category') || 'all');
+  document.getElementById('categorySelect').value = TITLES[initial] ? initial : 'all';
+
+  const [products, bestsellersConfig] = await Promise.all([
+    fetch('/api/storefront/products').then(r => r.json()),
+    fetch('/api/storefront/new-arrivals').then(r => r.json()).catch(() => ({ product_ids: [] })),
+  ]);
+  allProducts = products;
+  bestSellerIds = new Set(bestsellersConfig.product_ids || []);
+  applyFilters();
+})();
 </script>
 </body>
 </html>
